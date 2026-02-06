@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
-const displaySans = Space_Grotesk({
+const displaySans = Inter({
   variable: "--font-display-sans",
   subsets: ["latin"],
 });

@@ -101,8 +101,12 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
+    <div className="flex min-h-dvh w-full items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        <Suspense>
+          <LoginForm />
+        </Suspense>
+      </div>
+    </div>
   );
 }
