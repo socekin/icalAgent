@@ -47,7 +47,6 @@ export async function GET(
       id: subscription.id,
       subscription_key: subscription.subscription_key,
       display_name: subscription.display_name,
-      domain: subscription.domain,
       timezone: subscription.timezone,
       feed_url: buildFeedUrl(subscription.feed_token),
       updated_at: subscription.updated_at,

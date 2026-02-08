@@ -1,10 +1,7 @@
-export type CalendarDomain = string;
-
 export type Subscription = {
   id: string;
   subscriptionKey: string;
   displayName: string;
-  domain: CalendarDomain;
   timezone: string;
   feedToken: string;
   updatedAt: string;
@@ -22,7 +19,6 @@ export type CalendarEvent = {
   location?: string;
   status: "scheduled" | "cancelled" | "postponed";
   sourceUrl: string;
-  confidence: number;
   labels: string[];
 };
 
@@ -51,5 +47,4 @@ export type ApiKeyCreateResponse = {
 // 事件 + 所属订阅信息（用于合并日历视图）
 export type CalendarEventWithSub = CalendarEvent & {
   subscriptionName: string;
-  subscriptionDomain: CalendarDomain;
 };

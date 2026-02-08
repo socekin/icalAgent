@@ -11,7 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getDomainColor } from "@/components/calendar-view";
+import { getSubscriptionColor } from "@/components/calendar-view";
 import { cn } from "@/lib/utils";
 import type { Subscription } from "@/lib/types";
 
@@ -34,10 +34,7 @@ export function SubscriptionFilter({
   const filtered = subscriptions.filter((s) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
-    return (
-      s.displayName.toLowerCase().includes(q) ||
-      s.domain.toLowerCase().includes(q)
-    );
+    return s.displayName.toLowerCase().includes(q);
   });
 
   function toggleAll() {
@@ -112,7 +109,7 @@ export function SubscriptionFilter({
           ) : (
             filtered.map((sub) => {
               const active = selected.has(sub.id);
-              const color = getDomainColor(sub.domain);
+              const color = getSubscriptionColor(sub.displayName);
 
               return (
                 <button

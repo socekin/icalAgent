@@ -11,7 +11,6 @@ type ToolEvent = {
   location?: string | null;
   status?: string;
   source_url?: string;
-  confidence?: number;
   labels?: string[];
 };
 
@@ -19,7 +18,6 @@ type DbSubscription = {
   id: string;
   subscription_key: string;
   display_name: string;
-  domain: string | null;
   timezone: string;
   feed_token: string;
   user_id: string;
@@ -39,7 +37,6 @@ export function createSourceHash(event: ToolEvent): string {
     timezone: event.timezone,
     location: event.location,
     source_url: event.source_url,
-    confidence: event.confidence,
     labels: event.labels,
   });
   return createHash("sha256").update(raw).digest("hex");
@@ -56,7 +53,6 @@ export function buildFeedUrl(feedToken: string): string {
 export async function upsertSubscription(params: {
   subscriptionKey: string;
   displayName: string;
-  domain?: string;
   timezone?: string;
   userId: string;
 }): Promise<DbSubscription> {
@@ -78,7 +74,6 @@ export async function upsertSubscription(params: {
   const payload = {
     subscription_key: params.subscriptionKey,
     display_name: params.displayName,
-    domain: params.domain?.trim().toLowerCase() || null,
     timezone: params.timezone ?? existing?.timezone ?? "UTC",
     feed_token: existing?.feed_token ?? generateFeedToken(),
     user_id: params.userId,
@@ -130,7 +125,6 @@ export async function upsertEvents(subscriptionId: string, events: ToolEvent[]):
     status: event.status || "scheduled",
     source_url: event.source_url || "",
     source_hash: createSourceHash(event),
-    confidence: event.confidence ?? 0.8,
     labels_json: event.labels ?? [],
     updated_at: new Date().toISOString(),
   }));

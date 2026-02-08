@@ -10,14 +10,12 @@ export const eventSchema = z.object({
   location: z.string().nullish(),
   status: z.enum(["scheduled", "cancelled", "postponed"]).default("scheduled"),
   source_url: z.string().default(""),
-  confidence: z.number().min(0).max(1).default(0.8),
   labels: z.array(z.string()).default([]),
 });
 
 export const createSubscriptionSchema = z.object({
   subscription_key: z.string().min(1, "subscription_key 不能为空"),
   display_name: z.string().min(1, "display_name 不能为空"),
-  domain: z.string().optional(),
   timezone: z.string().default("UTC"),
   events: z.array(eventSchema).default([]),
 });

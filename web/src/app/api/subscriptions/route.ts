@@ -28,7 +28,6 @@ export async function POST(request: Request) {
     const subscription = await upsertSubscription({
       subscriptionKey: body.subscription_key,
       displayName: body.display_name,
-      domain: body.domain,
       timezone: body.timezone,
       userId: auth.userId,
     });
@@ -76,7 +75,7 @@ export async function GET(request: Request) {
     const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from("subscriptions")
-      .select("id, subscription_key, display_name, domain, timezone, feed_token, updated_at")
+      .select("id, subscription_key, display_name, timezone, feed_token, updated_at")
       .eq("user_id", auth.userId)
       .order("updated_at", { ascending: false });
 
@@ -88,7 +87,6 @@ export async function GET(request: Request) {
       id: string;
       subscription_key: string;
       display_name: string;
-      domain: string | null;
       timezone: string;
       feed_token: string;
       updated_at: string;
@@ -96,7 +94,6 @@ export async function GET(request: Request) {
       id: row.id,
       subscription_key: row.subscription_key,
       display_name: row.display_name,
-      domain: row.domain,
       timezone: row.timezone,
       feed_url: buildFeedUrl(row.feed_token),
       updated_at: row.updated_at,

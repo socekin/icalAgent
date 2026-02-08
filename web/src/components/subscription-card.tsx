@@ -1,48 +1,25 @@
 import Link from "next/link";
-import { CalendarDays, ChevronRight, Globe2, Rss } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import type { Subscription } from "@/lib/types";
 
-import { cn } from "@/lib/utils";
-
-const domainLabelMap: Record<string, string> = {
-  sports: "体育",
-  entertainment: "影视",
-  weather: "天气",
-  general: "通用",
-};
-
-function getDomainLabel(domain: string): string {
-  const normalized = domain.trim().toLowerCase();
-  if (!normalized) {
-    return "通用";
-  }
-  return domainLabelMap[normalized] ?? normalized.toUpperCase();
-}
-
 export function SubscriptionCard({ subscription }: { subscription: Subscription }) {
   return (
     <Card className="group relative overflow-hidden rounded-2xl border-zinc-100 bg-white transition-all duration-300 hover:border-zinc-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
       <CardHeader className="pb-2 px-4 pt-4">
         <div className="flex items-start justify-between">
-          <Badge variant="secondary" className="rounded-md bg-zinc-100 px-2 py-0 text-[10px] font-bold tracking-tight text-zinc-900">
-            {subscription.domain.toUpperCase()}
-          </Badge>
-          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <CardTitle className="text-base font-bold tracking-tight text-zinc-950 truncate">
+            {subscription.displayName}
+          </CardTitle>
+          <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
         </div>
-        <CardTitle className="mt-2 text-base font-bold tracking-tight text-zinc-950 truncate">
-          {subscription.displayName}
-        </CardTitle>
       </CardHeader>
       <CardContent className="pb-3 px-4">
         <div className="flex flex-col gap-1">

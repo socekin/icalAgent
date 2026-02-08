@@ -49,18 +49,17 @@ Authorization: Bearer <ICALAGENT_API_KEY>
 {
   "subscription_key": "shanghai-weather-7d",
   "display_name": "上海7日天气",
-  "domain": "weather",
   "timezone": "Asia/Shanghai",
   "events": [
     {
       "external_id": "weather_shanghai_2026-02-07",
       "title": "上海天气：晴 2°C~10°C",
+      "description": "风力：东南风 3-4 级\n湿度：65%\n空气质量：良\n来源：weather.com",
       "start_at": "2026-02-07T00:00:00+08:00",
       "end_at": "2026-02-07T23:59:59+08:00",
       "timezone": "Asia/Shanghai",
       "location": "上海",
       "source_url": "https://weather.com",
-      "confidence": 0.9,
       "labels": ["weather", "shanghai"]
     }
   ]
@@ -73,18 +72,28 @@ Authorization: Bearer <ICALAGENT_API_KEY>
 |------|------|------|
 | subscription_key | 是 | 订阅唯一标识（同一 key 会更新而非重复创建） |
 | display_name | 是 | 显示名称 |
-| domain | 否 | 领域分类（weather/sports/entertainment 等） |
 | timezone | 否 | 时区，默认 UTC |
 | events | 否 | 事件数组 |
 | events[].external_id | 是 | 事件唯一标识（同 subscription 下相同 external_id 会更新） |
-| events[].title | 是 | 事件标题 |
+| events[].title | 是 | 事件标题（简短，< 30 字，用于日历格子一览） |
+| events[].description | 否 | 事件备注（补充详情，显示在日历 App 的备注区域，见下方填写指南） |
 | events[].start_at | 是 | 开始时间（ISO 8601） |
 | events[].end_at | 否 | 结束时间 |
 | events[].timezone | 否 | 事件时区，默认 UTC |
 | events[].location | 否 | 地点 |
 | events[].source_url | 否 | 信息来源链接 |
-| events[].confidence | 否 | 置信度 0-1，默认 0.8 |
 | events[].labels | 否 | 标签数组 |
+
+**description 填写指南：**
+
+title 保持简短（一眼可扫），description 放补充上下文。不同场景的推荐格式：
+
+- **体育赛事**：`"常规赛 | 2025-26 赛季\n场馆：Crypto.com Arena, Los Angeles\n转播：ESPN / 腾讯体育\n来源：nba.com"`
+- **电影上映**：`"导演：Christopher McQuarrie\n主演：Tom Cruise, Hayley Atwell\n类型：动作 / 冒险 | 片长：163 分钟\n来源：imdb.com"`
+- **天气预报**：`"风力：东南风 3-4 级\n湿度：65%\n空气质量：良\n来源：weather.com"`
+- **演出/展览**：`"演出：周杰伦嘉年华世界巡回演唱会\n场馆：上海体育场\n票价：380-1880 元\n来源：damai.cn"`
+
+原则：最后一行始终写 `来源：{域名}`，确保用户能溯源。
 
 **响应（201）：**
 
@@ -131,18 +140,17 @@ curl -X POST "${ICALAGENT_BASE_URL}/api/subscriptions" \
   -d '{
     "subscription_key": "shanghai-weather-7d",
     "display_name": "上海7日天气",
-    "domain": "weather",
     "timezone": "Asia/Shanghai",
     "events": [
       {
         "external_id": "weather_shanghai_2026-02-07",
         "title": "上海天气：晴 2°C~10°C",
+        "description": "风力：东南风 3-4 级\n湿度：65%\n空气质量：良\n来源：weather.com",
         "start_at": "2026-02-07T00:00:00+08:00",
         "end_at": "2026-02-07T23:59:59+08:00",
         "timezone": "Asia/Shanghai",
         "location": "上海",
         "source_url": "https://weather.com",
-        "confidence": 0.9,
         "labels": ["weather", "shanghai"]
       }
     ]
@@ -168,6 +176,7 @@ curl -X POST "${ICALAGENT_BASE_URL}/api/subscriptions" \
 3. 构建 events 数组，每天一个事件：
    - external_id: `weather_shanghai_YYYY-MM-DD`
    - title: `上海天气：{天气描述} {最低温}°C~{最高温}°C`
+   - description: `"风力：{风向} {风力等级}\n湿度：{湿度}\n空气质量：{AQI}\n来源：weather.com"`
    - start_at/end_at: 当天 00:00 ~ 23:59
    - labels: `["weather", "shanghai"]`
 4. POST /api/subscriptions 写入
@@ -182,6 +191,7 @@ curl -X POST "${ICALAGENT_BASE_URL}/api/subscriptions" \
 3. 构建 events 数组：
    - external_id: `nba_lakers_YYYY-MM-DD_vs_{对手}`
    - title: `湖人 vs {对手}`
+   - description: `"{赛事类型} | {赛季}\n场馆：{场馆名}, {城市}\n转播：{转播频道}\n来源：nba.com"`
    - location: 比赛场馆
    - labels: `["sports", "nba", "lakers"]`
 4. POST /api/subscriptions 写入

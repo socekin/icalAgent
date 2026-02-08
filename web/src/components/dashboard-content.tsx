@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { CalendarEventWithSub, Subscription } from "@/lib/types";
 
+
 type DashboardContentProps = {
   subscriptions: Subscription[];
   allEvents: CalendarEventWithSub[];
@@ -48,7 +49,6 @@ export function DashboardContent({
     return subscriptions.filter(
       (s) =>
         s.displayName.toLowerCase().includes(q) ||
-        s.domain.toLowerCase().includes(q) ||
         s.subscriptionKey.toLowerCase().includes(q),
     );
   }, [subscriptions, searchQuery]);

@@ -32,7 +32,6 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
             <TableHead className="h-9 text-xs font-medium text-zinc-500">事件标题</TableHead>
             <TableHead className="h-9 text-xs font-medium text-zinc-500">开始时间</TableHead>
             <TableHead className="h-9 text-xs font-medium text-zinc-500">状态</TableHead>
-            <TableHead className="h-9 text-xs font-medium text-zinc-500">置信度</TableHead>
             <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">来源</TableHead>
           </TableRow>
         </TableHeader>
@@ -53,9 +52,6 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
                 <Badge variant="outline" className="rounded-md border-zinc-200 px-1.5 py-0 text-[10px] font-normal text-zinc-600">
                   {statusLabelMap[event.status]}
                 </Badge>
-              </TableCell>
-              <TableCell className="py-2.5 font-mono text-xs text-zinc-500">
-                {(event.confidence * 100).toFixed(0)}%
               </TableCell>
               <TableCell className="py-2.5 text-right">
                 <a

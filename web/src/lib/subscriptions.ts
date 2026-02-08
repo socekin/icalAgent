@@ -6,13 +6,12 @@ import {
   getSubscriptionById as getMockSubscriptionById,
 } from "@/lib/mock-data";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
-import type { CalendarDomain, CalendarEvent, CalendarEventWithSub, Subscription } from "@/lib/types";
+import type { CalendarEvent, CalendarEventWithSub, Subscription } from "@/lib/types";
 
 type DbSubscriptionRow = {
   id: string;
   subscription_key: string;
   display_name: string;
-  domain: string | null;
   timezone: string;
   feed_token: string;
   updated_at: string;
@@ -30,24 +29,14 @@ type DbEventRow = {
   location: string | null;
   status: "scheduled" | "cancelled" | "postponed";
   source_url: string;
-  confidence: number;
   labels_json: unknown;
 };
-
-function normalizeDomain(domain: string | null): CalendarDomain {
-  const normalized = domain?.trim();
-  if (!normalized) {
-    return "general";
-  }
-  return normalized.toLowerCase();
-}
 
 function toSubscription(row: DbSubscriptionRow): Subscription {
   return {
     id: row.id,
     subscriptionKey: row.subscription_key,
     displayName: row.display_name,
-    domain: normalizeDomain(row.domain),
     timezone: row.timezone,
     feedToken: row.feed_token,
     updatedAt: row.updated_at,
@@ -71,7 +60,6 @@ function toCalendarEvent(row: DbEventRow): CalendarEvent {
     location: row.location ?? undefined,
     status: row.status,
     sourceUrl: row.source_url,
-    confidence: Number(row.confidence),
     labels,
   };
 }
@@ -92,7 +80,7 @@ export async function listSubscriptions(userId?: string): Promise<Subscription[]
 
   let query = supabase
     .from("subscriptions")
-    .select("id,subscription_key,display_name,domain,timezone,feed_token,updated_at")
+    .select("id,subscription_key,display_name,timezone,feed_token,updated_at")
     .order("updated_at", { ascending: false });
 
   if (userId) {
@@ -122,7 +110,7 @@ export async function getSubscriptionById(
 
   let query = supabase
     .from("subscriptions")
-    .select("id,subscription_key,display_name,domain,timezone,feed_token,updated_at")
+    .select("id,subscription_key,display_name,timezone,feed_token,updated_at")
     .eq("id", id);
 
   if (userId) {
@@ -151,7 +139,7 @@ export async function getSubscriptionByFeedToken(
 
   const { data, error } = await supabase
     .from("subscriptions")
-    .select("id,subscription_key,display_name,domain,timezone,feed_token,updated_at")
+    .select("id,subscription_key,display_name,timezone,feed_token,updated_at")
     .eq("feed_token", feedToken)
     .maybeSingle<DbSubscriptionRow>();
 
@@ -176,7 +164,7 @@ export async function getEventsBySubscriptionId(
   const { data, error } = await supabase
     .from("events")
     .select(
-      "id,subscription_id,external_id,title,description,start_at,end_at,timezone,location,status,source_url,confidence,labels_json",
+      "id,subscription_id,external_id,title,description,start_at,end_at,timezone,location,status,source_url,labels_json",
     )
     .eq("subscription_id", subscriptionId)
     .order("start_at", { ascending: true })
@@ -290,7 +278,6 @@ export async function getAllEventsForUser(userId: string): Promise<{
         allEvents.push({
           ...evt,
           subscriptionName: sub.displayName,
-          subscriptionDomain: sub.domain,
         });
       }
     }
@@ -309,7 +296,7 @@ export async function getAllEventsForUser(userId: string): Promise<{
   const { data, error } = await supabase
     .from("events")
     .select(
-      "id,subscription_id,external_id,title,description,start_at,end_at,timezone,location,status,source_url,confidence,labels_json",
+      "id,subscription_id,external_id,title,description,start_at,end_at,timezone,location,status,source_url,labels_json",
     )
     .in("subscription_id", subIds)
     .order("start_at", { ascending: true })
@@ -325,7 +312,6 @@ export async function getAllEventsForUser(userId: string): Promise<{
     return {
       ...base,
       subscriptionName: sub?.displayName ?? "未知订阅",
-      subscriptionDomain: sub?.domain ?? "general",
     };
   });
 

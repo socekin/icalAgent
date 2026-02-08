@@ -97,7 +97,6 @@ export default async function SubscriptionDetailPage({
           <h2 className="ml-1 text-sm font-semibold text-zinc-900">日历预览</h2>
           <CalendarView
             events={events}
-            singleDomain={subscription.domain}
             subscriptionName={subscription.displayName}
           />
         </section>
