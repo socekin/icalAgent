@@ -28,37 +28,43 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
     <div className="overflow-hidden rounded-3xl border border-zinc-100 bg-white shadow-sm">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>事件标题</TableHead>
-            <TableHead>开始时间</TableHead>
-            <TableHead>状态</TableHead>
-            <TableHead>置信度</TableHead>
-            <TableHead>来源</TableHead>
+          <TableRow className="border-b-zinc-100 hover:bg-transparent">
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">事件标题</TableHead>
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">开始时间</TableHead>
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">状态</TableHead>
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">置信度</TableHead>
+            <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">来源</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {events.map((event) => (
-            <TableRow key={event.id}>
-              <TableCell className="font-medium">{event.title}</TableCell>
-              <TableCell className="font-mono text-xs">
+            <TableRow key={event.id} className="border-b-zinc-50 hover:bg-zinc-50/50">
+              <TableCell className="py-2.5 font-medium text-sm text-zinc-700">{event.title}</TableCell>
+              <TableCell className="py-2.5 font-mono text-xs text-zinc-500">
                 {new Date(event.startAt).toLocaleString("zh-CN", {
+                  month: "numeric",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "numeric",
                   hour12: false,
                 })}
               </TableCell>
-              <TableCell>
-                <Badge variant="outline">{statusLabelMap[event.status]}</Badge>
+              <TableCell className="py-2.5">
+                <Badge variant="outline" className="rounded-md border-zinc-200 px-1.5 py-0 text-[10px] font-normal text-zinc-600">
+                  {statusLabelMap[event.status]}
+                </Badge>
               </TableCell>
-              <TableCell className="font-mono text-xs">
+              <TableCell className="py-2.5 font-mono text-xs text-zinc-500">
                 {(event.confidence * 100).toFixed(0)}%
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2.5 text-right">
                 <a
-                  className="text-sm text-zinc-700 underline decoration-zinc-300 underline-offset-4 hover:text-zinc-950"
+                  className="text-xs text-zinc-400 decoration-zinc-200 underline-offset-2 hover:text-zinc-900 hover:underline"
                   href={event.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  查看来源
+                  查看
                 </a>
               </TableCell>
             </TableRow>
