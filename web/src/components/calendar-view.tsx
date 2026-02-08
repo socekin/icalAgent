@@ -5,19 +5,29 @@ import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { CalendarDomain, CalendarEvent, CalendarEventWithSub } from "@/lib/types";
+import type { CalendarEvent, CalendarEventWithSub } from "@/lib/types";
 
-// 域名颜色映射
-export const domainColors: Record<string, { bg: string; text: string; dot: string }> = {
-  sports: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
-  entertainment: { bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-500" },
-  weather: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500" },
-  general: { bg: "bg-zinc-100", text: "text-zinc-700", dot: "bg-zinc-400" },
-};
+// 订阅颜色调色板（按名称哈希分配）
+const colorPalette = [
+  { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
+  { bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-500" },
+  { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500" },
+  { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+  { bg: "bg-pink-50", text: "text-pink-700", dot: "bg-pink-500" },
+  { bg: "bg-cyan-50", text: "text-cyan-700", dot: "bg-cyan-500" },
+  { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
+  { bg: "bg-indigo-50", text: "text-indigo-700", dot: "bg-indigo-500" },
+];
 
-export function getDomainColor(domain: CalendarDomain) {
-  const normalized = domain.trim().toLowerCase();
-  return domainColors[normalized] ?? domainColors.general;
+const defaultColor = { bg: "bg-zinc-100", text: "text-zinc-700", dot: "bg-zinc-400" };
+
+export function getSubscriptionColor(name: string) {
+  if (!name) return defaultColor;
+  let hash = 0;
+  for (const ch of name) {
+    hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0;
+  }
+  return colorPalette[Math.abs(hash) % colorPalette.length];
 }
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
@@ -43,33 +53,52 @@ function toDateKey(date: Date): string {
 
 type EventItem = (CalendarEvent | CalendarEventWithSub) & {
   subscriptionName?: string;
-  subscriptionDomain?: CalendarDomain;
 };
 
 type CalendarViewProps = {
   events: EventItem[];
-  singleDomain?: CalendarDomain;
   subscriptionName?: string;
   actions?: React.ReactNode;
 };
 
-export function CalendarView({ events, singleDomain, subscriptionName, actions }: CalendarViewProps) {
+export function CalendarView({ events, subscriptionName, actions }: CalendarViewProps) {
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // 按日期分组事件
+  // 按日期分组事件（跨天事件会出现在每一天）
   const eventsByDate = useMemo(() => {
     const map = new Map<string, EventItem[]>();
-    for (const event of events) {
-      const date = new Date(event.startAt);
-      const key = toDateKey(date);
+
+    function addToDate(key: string, event: EventItem) {
       const existing = map.get(key);
       if (existing) {
         existing.push(event);
       } else {
         map.set(key, [event]);
+      }
+    }
+
+    for (const event of events) {
+      const start = new Date(event.startAt);
+      const startKey = toDateKey(start);
+      addToDate(startKey, event);
+
+      // 如果有 endAt 且跨天，在中间每一天也加入该事件
+      if (event.endAt) {
+        const end = new Date(event.endAt);
+        // 从 startAt 次日 00:00 开始逐日检查
+        const cursor = new Date(start);
+        cursor.setHours(0, 0, 0, 0);
+        cursor.setDate(cursor.getDate() + 1);
+        while (cursor <= end) {
+          const key = toDateKey(cursor);
+          if (key !== startKey) {
+            addToDate(key, event);
+          }
+          cursor.setDate(cursor.getDate() + 1);
+        }
       }
     }
     return map;
@@ -214,10 +243,10 @@ export function CalendarView({ events, singleDomain, subscriptionName, actions }
               {/* 事件指示条（最多显示 2 条） */}
               <div className="mt-0.5 space-y-0.5">
                 {dayEvents.slice(0, 2).map((evt) => {
-                  const domain = "subscriptionDomain" in evt && evt.subscriptionDomain
-                    ? evt.subscriptionDomain
-                    : singleDomain ?? "general";
-                  const color = getDomainColor(domain);
+                  const name = "subscriptionName" in evt && evt.subscriptionName
+                    ? evt.subscriptionName
+                    : subscriptionName ?? "";
+                  const color = getSubscriptionColor(name);
                   return (
                     <div
                       key={evt.id}
@@ -248,10 +277,10 @@ export function CalendarView({ events, singleDomain, subscriptionName, actions }
           ) : (
             <div className="space-y-2">
               {selectedEvents.map((evt) => {
-                const domain = "subscriptionDomain" in evt && evt.subscriptionDomain
-                  ? evt.subscriptionDomain
-                  : singleDomain ?? "general";
-                const color = getDomainColor(domain);
+                const name = "subscriptionName" in evt && evt.subscriptionName
+                  ? evt.subscriptionName
+                  : subscriptionName ?? "";
+                const color = getSubscriptionColor(name);
                 const subName = "subscriptionName" in evt && evt.subscriptionName
                   ? evt.subscriptionName
                   : subscriptionName;
@@ -281,6 +310,11 @@ export function CalendarView({ events, singleDomain, subscriptionName, actions }
                           </>
                         )}
                       </div>
+                      {evt.description && (
+                        <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-zinc-500">
+                          {evt.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );

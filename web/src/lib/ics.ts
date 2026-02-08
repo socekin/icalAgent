@@ -119,7 +119,7 @@ export function buildMergedIcs(
     "PRODID:-//iCalAgent//AI Calendar//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    "X-WR-CALNAME:iCalAgent - 全部日历",
+    "X-WR-CALNAME:iCalAgent",
     "X-WR-TIMEZONE:Asia/Shanghai",
     body,
     "END:VCALENDAR",
