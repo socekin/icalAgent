@@ -1,11 +1,12 @@
 import {
   demoSubscriptions,
+  demoEventsBySubscription,
   getEventsBySubscriptionId as getMockEventsBySubscriptionId,
   getSubscriptionByFeedToken as getMockSubscriptionByFeedToken,
   getSubscriptionById as getMockSubscriptionById,
 } from "@/lib/mock-data";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
-import type { CalendarDomain, CalendarEvent, Subscription } from "@/lib/types";
+import type { CalendarDomain, CalendarEvent, CalendarEventWithSub, Subscription } from "@/lib/types";
 
 type DbSubscriptionRow = {
   id: string;
@@ -185,4 +186,148 @@ export async function getEventsBySubscriptionId(
     throw new Error(`读取事件失败: ${error.message}`);
   }
   return (data ?? []).map(toCalendarEvent);
+}
+
+// --- Master Feed (总体订阅) ---
+
+function generateMasterToken(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "mf_";
+  for (let i = 0; i < 24; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
+/**
+ * 获取或创建用户的 master feed token
+ * 如果 user_profiles 表不存在则返回 null（优雅降级）
+ */
+export async function getOrCreateMasterFeedToken(userId: string): Promise<string | null> {
+  if (shouldUseMockFallback()) {
+    return "mock_master_feed_token";
+  }
+
+  const supabase = getSupabaseServerClient();
+  if (!supabase) {
+    return "mock_master_feed_token";
+  }
+
+  // 先查询已有记录
+  const { data: existing, error: selectError } = await supabase
+    .from("user_profiles")
+    .select("master_feed_token")
+    .eq("user_id", userId)
+    .maybeSingle<{ master_feed_token: string }>();
+
+  // 表不存在等情况，优雅降级
+  if (selectError) {
+    console.warn("[master-feed] 查询 user_profiles 失败，跳过:", selectError.message);
+    return null;
+  }
+
+  if (existing) {
+    return existing.master_feed_token;
+  }
+
+  // 不存在则创建
+  const token = generateMasterToken();
+  const { error } = await supabase
+    .from("user_profiles")
+    .insert({ user_id: userId, master_feed_token: token });
+
+  if (error) {
+    console.warn("[master-feed] 创建 master feed token 失败，跳过:", error.message);
+    return null;
+  }
+  return token;
+}
+
+/**
+ * 通过 master feed token 反查 user_id
+ */
+export async function getUserIdByMasterFeedToken(token: string): Promise<string | null> {
+  if (shouldUseMockFallback()) {
+    return null;
+  }
+
+  const supabase = getSupabaseServerClient();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .select("user_id")
+    .eq("master_feed_token", token)
+    .maybeSingle<{ user_id: string }>();
+
+  if (error) {
+    console.warn("[master-feed] 查询 master feed token 失败:", error.message);
+    return null;
+  }
+  return data?.user_id ?? null;
+}
+
+/**
+ * 获取用户所有订阅的全部事件（带订阅信息）
+ */
+export async function getAllEventsForUser(userId: string): Promise<{
+  subscriptions: Subscription[];
+  events: CalendarEventWithSub[];
+}> {
+  const subscriptions = await listSubscriptions(userId);
+  if (subscriptions.length === 0) {
+    return { subscriptions, events: [] };
+  }
+
+  // Mock fallback
+  if (shouldUseMockFallback()) {
+    const allEvents: CalendarEventWithSub[] = [];
+    for (const sub of subscriptions) {
+      const subEvents = demoEventsBySubscription[sub.id] ?? [];
+      for (const evt of subEvents) {
+        allEvents.push({
+          ...evt,
+          subscriptionName: sub.displayName,
+          subscriptionDomain: sub.domain,
+        });
+      }
+    }
+    allEvents.sort((a, b) => a.startAt.localeCompare(b.startAt));
+    return { subscriptions, events: allEvents };
+  }
+
+  const supabase = getSupabaseServerClient();
+  if (!supabase) {
+    return { subscriptions, events: [] };
+  }
+
+  const subIds = subscriptions.map((s) => s.id);
+  const subMap = new Map(subscriptions.map((s) => [s.id, s]));
+
+  const { data, error } = await supabase
+    .from("events")
+    .select(
+      "id,subscription_id,external_id,title,description,start_at,end_at,timezone,location,status,source_url,confidence,labels_json",
+    )
+    .in("subscription_id", subIds)
+    .order("start_at", { ascending: true })
+    .returns<DbEventRow[]>();
+
+  if (error) {
+    throw new Error(`读取用户全部事件失败: ${error.message}`);
+  }
+
+  const events: CalendarEventWithSub[] = (data ?? []).map((row) => {
+    const base = toCalendarEvent(row);
+    const sub = subMap.get(row.subscription_id);
+    return {
+      ...base,
+      subscriptionName: sub?.displayName ?? "未知订阅",
+      subscriptionDomain: sub?.domain ?? "general",
+    };
+  });
+
+  return { subscriptions, events };
 }

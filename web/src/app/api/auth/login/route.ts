@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServiceRoleClient, setSessionCookie } from "@/lib/auth";
+import { getServiceRoleClient, setSessionCookies } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +24,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "登录失败" }, { status: 500 });
     }
 
-    await setSessionCookie(data.session.access_token);
+    // 同时保存 access_token 和 refresh_token
+    await setSessionCookies(data.session.access_token, data.session.refresh_token);
 
     return NextResponse.json({
       user: { id: data.user.id, email: data.user.email },

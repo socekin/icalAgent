@@ -47,3 +47,9 @@ export type ApiKeyCreateResponse = {
   keyPrefix: string;
   createdAt: string;
 };
+
+// 事件 + 所属订阅信息（用于合并日历视图）
+export type CalendarEventWithSub = CalendarEvent & {
+  subscriptionName: string;
+  subscriptionDomain: CalendarDomain;
+};

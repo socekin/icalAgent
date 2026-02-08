@@ -1,12 +1,30 @@
-import { SubscriptionCard } from "@/components/subscription-card";
+import { DashboardContent } from "@/components/dashboard-content";
 import { getAuthenticatedUser } from "@/lib/auth";
-import { listSubscriptions } from "@/lib/subscriptions";
+import {
+  getAllEventsForUser,
+  getOrCreateMasterFeedToken,
+  listSubscriptions,
+} from "@/lib/subscriptions";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const user = await getAuthenticatedUser();
   const subscriptions = await listSubscriptions(user?.id);
+
+  // 获取 master feed token 和全部事件
+  let masterFeedUrl: string | null = null;
+  let allEvents: Awaited<ReturnType<typeof getAllEventsForUser>>["events"] = [];
+
+  if (user) {
+    const token = await getOrCreateMasterFeedToken(user.id);
+    if (token) {
+      masterFeedUrl = `/cal/all/${token}.ics`;
+    }
+
+    const result = await getAllEventsForUser(user.id);
+    allEvents = result.events;
+  }
 
   return (
     <div className="space-y-6">
@@ -24,11 +42,11 @@ export default async function DashboardPage() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {subscriptions.map((subscription) => (
-            <SubscriptionCard key={subscription.id} subscription={subscription} />
-          ))}
-        </div>
+        <DashboardContent
+          subscriptions={subscriptions}
+          allEvents={allEvents}
+          masterFeedUrl={masterFeedUrl}
+        />
       )}
     </div>
   );

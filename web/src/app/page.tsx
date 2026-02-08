@@ -1,11 +1,20 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CalendarCheck2, Globe2, ShieldCheck, Zap } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { getAuthenticatedUser } from "@/lib/auth";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  // 已登录用户直接跳转 dashboard
+  const user = await getAuthenticatedUser();
+  if (user) {
+    redirect("/dashboard");
+  }
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-12 sm:px-6 lg:px-8">
       <section className="rounded-2xl border border-border bg-white p-8 shadow-xs sm:p-12">

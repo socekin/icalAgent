@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-dvh w-full items-center justify-center p-4">
       <div className="w-full max-w-sm">
+        <div className="mb-4">
+          <Button variant="ghost" size="sm" asChild className="text-zinc-500 hover:text-zinc-900">
+            <Link href="/">
+              <ArrowLeft className="mr-1.5 h-4 w-4" />
+              返回首页
+            </Link>
+          </Button>
+        </div>
         <Suspense>
           <LoginForm />
         </Suspense>

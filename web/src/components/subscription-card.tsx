@@ -58,7 +58,7 @@ export function SubscriptionCard({ subscription }: { subscription: Subscription 
           <span className="truncate max-w-[120px]">/cal/{subscription.feedToken}.ics</span>
         </div>
         <Button asChild size="sm" className="rounded-md">
-          <Link href={`/subscriptions/${subscription.id}`}>
+          <Link href={`/dashboard/subscriptions/${subscription.id}`}>
             查看详情
             <ChevronRight className="h-3 w-3 ml-0.5" />
           </Link>

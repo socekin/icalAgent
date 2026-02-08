@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServiceRoleClient, setSessionCookie } from "@/lib/auth";
+import { getServiceRoleClient, setSessionCookies } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "注册成功但自动登录失败，请手动登录" }, { status: 201 });
     }
 
-    await setSessionCookie(signInData.session.access_token);
+    await setSessionCookies(signInData.session.access_token, signInData.session.refresh_token);
 
     return NextResponse.json({
       user: { id: data.user.id, email: data.user.email },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedUser, getServiceRoleClient } from "@/lib/auth";
 import { generateApiKey } from "@/lib/api-keys";
+import { encrypt } from "@/lib/encryption";
 
 // 创建 API Key
 export async function POST(request: Request) {
@@ -16,12 +17,15 @@ export async function POST(request: Request) {
     const { raw, prefix, hash } = generateApiKey();
     const supabase = getServiceRoleClient();
 
+    const encryptedKey = encrypt(raw);
+
     const { data, error } = await supabase
       .from("api_keys")
       .insert({
         user_id: user.id,
         key_prefix: prefix,
         key_hash: hash,
+        encrypted_key: encryptedKey,
         name,
       })
       .select("id, name, key_prefix, created_at")

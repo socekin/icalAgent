@@ -14,6 +14,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { ApiKey } from "@/lib/types";
 
 export default function KeysPage() {
@@ -24,6 +34,8 @@ export default function KeysPage() {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<ApiKey | null>(null);
 
   const fetchKeys = useCallback(async () => {
     try {
@@ -60,11 +72,13 @@ export default function KeysPage() {
     }
   }
 
-  async function handleRevoke(id: string) {
-    const res = await fetch(`/api/keys/${id}`, { method: "DELETE" });
+  async function handleRevokeConfirm() {
+    if (!revokeTarget) return;
+    const res = await fetch(`/api/keys/${revokeTarget.id}`, { method: "DELETE" });
     if (res.ok) {
       fetchKeys();
     }
+    setRevokeTarget(null);
   }
 
   function handleCopy() {
@@ -72,6 +86,24 @@ export default function KeysPage() {
       navigator.clipboard.writeText(createdKey);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  async function handleCopyKey(id: string) {
+    try {
+      setCopiedKeyId(id);
+      const res = await fetch(`/api/keys/${id}/reveal`);
+      const data = await res.json();
+      if (res.ok && data.key) {
+        await navigator.clipboard.writeText(data.key);
+        setTimeout(() => setCopiedKeyId(null), 2000);
+      } else {
+        setCopiedKeyId(null);
+        alert(data.error || "无法获取密钥");
+      }
+    } catch {
+      setCopiedKeyId(null);
+      alert("网络错误");
     }
   }
 
@@ -130,17 +162,15 @@ export default function KeysPage() {
                     请立即复制密钥，关闭后将无法再次查看完整密钥。
                   </DialogDescription>
                 </DialogHeader>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 truncate rounded-md bg-zinc-100 px-3 py-2 text-xs font-mono">
+                <div className="space-y-2">
+                  <code className="block break-all rounded-md bg-zinc-100 px-3 py-2 text-xs font-mono">
                     {createdKey}
                   </code>
-                  <Button variant="outline" size="icon" onClick={handleCopy}>
+                  <Button variant="outline" size="sm" className="w-full" onClick={handleCopy}>
                     <Copy className="h-4 w-4" />
+                    {copied ? "已复制" : "复制密钥"}
                   </Button>
                 </div>
-                {copied && (
-                  <p className="text-xs text-green-600">已复制到剪贴板</p>
-                )}
                 <DialogFooter>
                   <Button variant="outline" onClick={() => handleDialogClose(false)}>
                     关闭
@@ -189,30 +219,57 @@ export default function KeysPage() {
                         创建于{" "}
                         {new Date(k.createdAt).toLocaleDateString("zh-CN")}
                       </span>
-                      {k.lastUsedAt && (
-                        <span>
-                          最近使用{" "}
-                          {new Date(k.lastUsedAt).toLocaleDateString("zh-CN")}
-                        </span>
-                      )}
                     </div>
                   </div>
-                  {!k.revokedAt && (
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => handleRevoke(k.id)}
-                      title="吊销密钥"
-                    >
-                      <Trash2 className="h-4 w-4 text-zinc-500" />
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {!k.revokedAt && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => handleCopyKey(k.id)}
+                        title="复制密钥"
+                      >
+                        {copiedKeyId === k.id ? (
+                          <span className="text-xs text-green-600">已复制</span>
+                        ) : (
+                          <Copy className="h-4 w-4 text-zinc-500" />
+                        )}
+                      </Button>
+                    )}
+                    {!k.revokedAt && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setRevokeTarget(k)}
+                        title="吊销密钥"
+                      >
+                        <Trash2 className="h-4 w-4 text-zinc-500" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!revokeTarget} onOpenChange={(open) => !open && setRevokeTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认吊销密钥</AlertDialogTitle>
+            <AlertDialogDescription>
+              密钥「{revokeTarget?.name}」（{revokeTarget?.keyPrefix}...）吊销后将立即失效，使用该密钥的所有服务将无法继续访问。此操作不可撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRevokeConfirm} className="bg-red-600 hover:bg-red-700">
+              确认吊销
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
