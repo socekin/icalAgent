@@ -1,14 +1,26 @@
-import { readFile } from "node:fs/promises";
+import { readFile, access } from "node:fs/promises";
 import { join } from "node:path";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser, getServiceRoleClient } from "@/lib/auth";
 import { decrypt } from "@/lib/encryption";
 
+async function resolveSkillPath(): Promise<string> {
+  // Docker standalone: skill/ 在 cwd 内
+  const primary = join(process.cwd(), "skill", "SKILL.md");
+  try {
+    await access(primary);
+    return primary;
+  } catch {
+    // 开发环境: web/ 是 cwd，skill/ 在上级目录
+    return join(process.cwd(), "..", "skill", "SKILL.md");
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const keyId = request.nextUrl.searchParams.get("keyId");
 
-    const skillPath = join(process.cwd(), "..", "skill", "SKILL.md");
+    const skillPath = await resolveSkillPath();
     let content = await readFile(skillPath, "utf-8");
 
     // 有 keyId 时：验证登录 + 所有权，解密密钥并替换内容

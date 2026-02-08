@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.env
+.env.local
+*.md
+!skill/SKILL.md
+mcp-server/
+supabase/
