@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CalendarCheck2, Globe2, ShieldCheck, Zap } from "lucide-react";
 
@@ -10,11 +9,8 @@ import { getAuthenticatedUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  // 已登录用户直接跳转 dashboard
   const user = await getAuthenticatedUser();
-  if (user) {
-    redirect("/dashboard");
-  }
+
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-12 sm:px-6 lg:px-8">
       <section className="rounded-2xl border border-border bg-white p-8 shadow-xs sm:p-12">
@@ -35,12 +31,20 @@ export default async function HomePage() {
             让 AI 代理帮你搜索信息并自动维护日历。天气、赛程、会议、电影档期 —— 任何你关心的事件，都能一键变为稳定订阅。
           </p>
           <div className="flex flex-wrap gap-4 pt-4">
-            <Button asChild size="lg" className="px-8 font-semibold">
-              <Link href="/register">立即开始</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="px-8 font-semibold">
-              <Link href="/login">控制台登录</Link>
-            </Button>
+            {user ? (
+              <Button asChild size="lg" className="px-8 font-semibold">
+                <Link href="/dashboard">进入控制台</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild size="lg" className="px-8 font-semibold">
+                  <Link href="/register">立即开始</Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="px-8 font-semibold">
+                  <Link href="/login">控制台登录</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 

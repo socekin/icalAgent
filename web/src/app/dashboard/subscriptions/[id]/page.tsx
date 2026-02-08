@@ -36,7 +36,7 @@ export default async function SubscriptionDetailPage({
         <Button asChild variant="ghost" className="pl-0 text-zinc-600 hover:bg-transparent">
           <Link href="/dashboard">
             <ArrowLeft className="h-4 w-4" />
-            返回订阅列表
+            返回子日历列表
           </Link>
         </Button>
       </div>
