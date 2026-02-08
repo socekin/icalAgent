@@ -18,41 +18,39 @@ export function MasterFeedCard({ feedUrl }: { feedUrl: string }) {
   }
 
   return (
-    <Card className="border-zinc-300 shadow-none">
-      <CardHeader>
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-zinc-100">
           <Rss className="h-4 w-4 text-zinc-500" />
-          <CardTitle className="text-base">总体订阅</CardTitle>
         </div>
-        <CardDescription>
-          一个链接订阅全部日历，在 Apple Calendar / Google Calendar 中添加即可看到所有事件
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap items-center gap-2">
-          <code className="flex-1 truncate rounded-md bg-zinc-100 px-3 py-2 text-xs font-medium text-zinc-700">
-            {feedUrl}
-          </code>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleCopy}
-            className="shrink-0 rounded-full"
-          >
-            {copied ? (
-              <>
-                <Check className="h-3.5 w-3.5" />
-                已复制
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5" />
-                复制链接
-              </>
-            )}
-          </Button>
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-900">总体订阅</h3>
+          <p className="text-[10px] text-zinc-500">
+            在日历应用中添加此链接即可查看所有事件
+          </p>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <code className="flex-1 truncate rounded-lg bg-white px-2.5 py-1.5 text-[10px] font-medium text-zinc-600 shadow-sm ring-1 ring-zinc-100 sm:w-64 sm:flex-none">
+          {feedUrl}
+        </code>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleCopy}
+          className="h-7 shrink-0 rounded-lg px-2.5 text-xs shadow-sm hover:bg-white hover:text-zinc-900"
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5" />
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5 mr-1.5" />
+              复制
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }

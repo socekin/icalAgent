@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -48,13 +48,12 @@ type EventItem = (CalendarEvent | CalendarEventWithSub) & {
 
 type CalendarViewProps = {
   events: EventItem[];
-  // 单订阅模式：指定域名颜色
   singleDomain?: CalendarDomain;
-  // 单订阅模式下的订阅名称
   subscriptionName?: string;
+  actions?: React.ReactNode;
 };
 
-export function CalendarView({ events, singleDomain, subscriptionName }: CalendarViewProps) {
+export function CalendarView({ events, singleDomain, subscriptionName, actions }: CalendarViewProps) {
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -121,27 +120,55 @@ export function CalendarView({ events, singleDomain, subscriptionName }: Calenda
   const monthLabel = `${currentYear}年${currentMonth + 1}月`;
 
   return (
-    <div className="rounded-xl border border-zinc-300 bg-white">
-      {/* 月份导航 */}
-      <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
-        <Button variant="ghost" size="sm" onClick={goPrevMonth} className="h-8 w-8 p-0">
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-zinc-900">{monthLabel}</span>
-          <Button variant="outline" size="sm" onClick={goToday} className="h-6 rounded-full px-2 text-xs">
-            今天
-          </Button>
+    <div className="overflow-hidden rounded-3xl border border-zinc-100 bg-white shadow-sm">
+      {/* 头部：标题 + 导航 + 操作区 */}
+      <div className="flex flex-col gap-3 border-b border-zinc-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-bold tracking-tight text-zinc-950">{monthLabel}</h2>
+
+          <div className="flex items-center gap-0.5 rounded-full border border-zinc-100 bg-zinc-50/50 p-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goPrevMonth}
+              className="h-6 w-6 rounded-full hover:bg-white hover:shadow-sm"
+            >
+              <ChevronLeft className="h-3.5 w-3.5 text-zinc-500" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goNextMonth}
+              className="h-6 w-6 rounded-full hover:bg-white hover:shadow-sm"
+            >
+              <ChevronRight className="h-3.5 w-3.5 text-zinc-500" />
+            </Button>
+          </div>
+
+          {(currentYear !== today.getFullYear() || currentMonth !== today.getMonth()) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToday}
+              className="h-7 animate-in fade-in zoom-in-95 rounded-full border-zinc-200 px-3 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+            >
+              <RotateCcw className="mr-1 h-3 w-3" />
+              回到今天
+            </Button>
+          )}
         </div>
-        <Button variant="ghost" size="sm" onClick={goNextMonth} className="h-8 w-8 p-0">
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+
+        {actions && (
+          <div className="flex items-center gap-2">
+            {actions}
+          </div>
+        )}
       </div>
 
       {/* 星期标题行 */}
-      <div className="grid grid-cols-7 border-b border-zinc-100">
+      <div className="grid grid-cols-7 border-b border-zinc-100 bg-zinc-50/30">
         {WEEKDAYS.map((day) => (
-          <div key={day} className="py-2 text-center text-xs font-medium text-zinc-500">
+          <div key={day} className="py-2 text-center text-[10px] font-medium text-zinc-400">
             {day}
           </div>
         ))}
@@ -151,7 +178,7 @@ export function CalendarView({ events, singleDomain, subscriptionName }: Calenda
       <div className="grid grid-cols-7">
         {cells.map((day, idx) => {
           if (day === null) {
-            return <div key={`empty-${idx}`} className="min-h-[72px] border-b border-r border-zinc-100 sm:min-h-[88px]" />;
+            return <div key={`empty-${idx}`} className="min-h-[64px] border-b border-r border-zinc-100 sm:min-h-[80px]" />;
           }
 
           const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -166,16 +193,16 @@ export function CalendarView({ events, singleDomain, subscriptionName }: Calenda
               type="button"
               onClick={() => setSelectedDate(isSelected ? null : dateKey)}
               className={cn(
-                "min-h-[72px] border-b border-r border-zinc-100 p-1 text-left transition-colors hover:bg-zinc-50 sm:min-h-[88px] sm:p-1.5",
+                "min-h-[64px] border-b border-r border-zinc-100 p-1 text-left transition-colors hover:bg-zinc-50 sm:min-h-[80px] sm:p-1.5",
                 isSelected && "bg-zinc-50 ring-1 ring-inset ring-zinc-900",
               )}
             >
               <div className="flex items-start justify-between">
                 <span
                   className={cn(
-                    "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs",
+                    "inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px]",
                     isToday && "bg-zinc-900 font-semibold text-white",
-                    !isToday && "text-zinc-700",
+                    !isToday && "text-zinc-600",
                   )}
                 >
                   {day}

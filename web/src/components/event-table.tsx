@@ -18,14 +18,14 @@ const statusLabelMap: Record<CalendarEvent["status"], string> = {
 export function EventTable({ events }: { events: CalendarEvent[] }) {
   if (!events.length) {
     return (
-      <div className="rounded-xl border border-dashed border-zinc-300 bg-white/70 p-8 text-center text-sm text-zinc-500">
+      <div className="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50/50 p-8 text-center text-sm text-zinc-500">
         当前订阅还没有可展示的事件。
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-300 bg-white">
+    <div className="overflow-hidden rounded-3xl border border-zinc-100 bg-white shadow-sm">
       <Table>
         <TableHeader>
           <TableRow>
