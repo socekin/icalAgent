@@ -15,6 +15,7 @@ type DbSubscriptionRow = {
   timezone: string;
   feed_token: string;
   updated_at: string;
+  enabled: boolean;
 };
 
 type DbEventRow = {
@@ -40,6 +41,7 @@ function toSubscription(row: DbSubscriptionRow): Subscription {
     timezone: row.timezone,
     feedToken: row.feed_token,
     updatedAt: row.updated_at,
+    enabled: row.enabled,
   };
 }
 
@@ -80,7 +82,7 @@ export async function listSubscriptions(userId?: string): Promise<Subscription[]
 
   let query = supabase
     .from("subscriptions")
-    .select("id,subscription_key,display_name,timezone,feed_token,updated_at")
+    .select("id,subscription_key,display_name,timezone,feed_token,updated_at,enabled")
     .order("updated_at", { ascending: false });
 
   if (userId) {
@@ -110,7 +112,7 @@ export async function getSubscriptionById(
 
   let query = supabase
     .from("subscriptions")
-    .select("id,subscription_key,display_name,timezone,feed_token,updated_at")
+    .select("id,subscription_key,display_name,timezone,feed_token,updated_at,enabled")
     .eq("id", id);
 
   if (userId) {
@@ -139,7 +141,7 @@ export async function getSubscriptionByFeedToken(
 
   const { data, error } = await supabase
     .from("subscriptions")
-    .select("id,subscription_key,display_name,timezone,feed_token,updated_at")
+    .select("id,subscription_key,display_name,timezone,feed_token,updated_at,enabled")
     .eq("feed_token", feedToken)
     .maybeSingle<DbSubscriptionRow>();
 
@@ -290,7 +292,11 @@ export async function getAllEventsForUser(userId: string): Promise<{
     return { subscriptions, events: [] };
   }
 
-  const subIds = subscriptions.map((s) => s.id);
+  const enabledSubs = subscriptions.filter((s) => s.enabled);
+  if (enabledSubs.length === 0) {
+    return { subscriptions, events: [] };
+  }
+  const subIds = enabledSubs.map((s) => s.id);
   const subMap = new Map(subscriptions.map((s) => [s.id, s]));
 
   const { data, error } = await supabase

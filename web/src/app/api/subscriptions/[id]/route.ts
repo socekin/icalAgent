@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/api-keys";
 import { buildFeedUrl } from "@/lib/subscription-service";
-import { getServiceRoleClient } from "@/lib/auth";
+import { getAuthenticatedUser, getServiceRoleClient } from "@/lib/auth";
 
 // 获取订阅详情 + 事件
 export async function GET(
@@ -53,6 +53,55 @@ export async function GET(
     },
     events: events ?? [],
   });
+}
+
+// 更新订阅 enabled 状态（Dashboard Cookie session 认证）
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return NextResponse.json({ error: "未登录" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  let body: { enabled?: boolean };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "无效的请求体" }, { status: 400 });
+  }
+
+  if (typeof body.enabled !== "boolean") {
+    return NextResponse.json({ error: "enabled 字段必须为布尔值" }, { status: 400 });
+  }
+
+  const supabase = getServiceRoleClient();
+
+  // 验证订阅归属当前用户
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!subscription) {
+    return NextResponse.json({ error: "订阅不存在" }, { status: 404 });
+  }
+
+  const { error } = await supabase
+    .from("subscriptions")
+    .update({ enabled: body.enabled })
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }
 
 // 删除订阅

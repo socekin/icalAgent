@@ -3,9 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Link2 } from "lucide-react";
 
 import { CalendarView } from "@/components/calendar-view";
+import { CopyFeedButton } from "@/components/copy-feed-button";
 import { EventTable } from "@/components/event-table";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getEventsBySubscriptionId,
   getSubscriptionById,
@@ -35,14 +34,13 @@ export default async function SubscriptionDetailPage({
       {/* 头部：返回 + 标题 + 简要信息 */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 text-zinc-500">
-            <Button asChild variant="ghost" size="icon" className="h-6 w-6 -ml-1 text-zinc-500 hover:text-zinc-900">
-              <Link href="/dashboard">
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </Button>
+          <Link
+            href="/dashboard?tab=subscriptions"
+            className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-900 transition-colors -ml-1"
+          >
+            <ArrowLeft className="h-4 w-4" />
             <span className="text-xs font-medium">子日历详情</span>
-          </div>
+          </Link>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-950 ml-7">{subscription.displayName}</h1>
         </div>
 
@@ -83,11 +81,7 @@ export default async function SubscriptionDetailPage({
           <code className="flex-1 truncate rounded-lg bg-white px-2.5 py-1.5 text-[10px] font-medium text-zinc-600 shadow-sm ring-1 ring-zinc-100 sm:w-64 sm:flex-none">
             {feedUrl}
           </code>
-          <Button asChild size="sm" variant="outline" className="h-7 shrink-0 rounded-lg px-2.5 text-xs shadow-sm hover:bg-white hover:text-zinc-900">
-            <a href={feedUrl} target="_blank" rel="noreferrer">
-              打开
-            </a>
-          </Button>
+          <CopyFeedButton feedUrl={feedUrl} />
         </div>
       </div>
 

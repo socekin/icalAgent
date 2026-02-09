@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { CalendarView } from "@/components/calendar-view";
@@ -24,13 +25,29 @@ export function DashboardContent({
   allEvents,
   masterFeedUrl,
 }: DashboardContentProps) {
-  // Tab 状态
-  const [activeTab, setActiveTab] = useState("calendar");
-
-  // 过滤器状态：默认全选
-  const [selectedSubIds, setSelectedSubIds] = useState<Set<string>>(
-    () => new Set(subscriptions.map((s) => s.id)),
+  // Tab 状态：从 URL ?tab= 参数初始化
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(
+    () => searchParams.get("tab") === "subscriptions" ? "subscriptions" : "calendar",
   );
+
+  // 过滤器状态：从 enabled 字段构建初始值
+  const [selectedSubIds, setSelectedSubIds] = useState<Set<string>>(
+    () => new Set(subscriptions.filter((s) => s.enabled).map((s) => s.id)),
+  );
+
+  // 单个订阅 toggle，同步更新本地 state
+  const handleToggle = useCallback((id: string, enabled: boolean) => {
+    setSelectedSubIds((prev) => {
+      const next = new Set(prev);
+      if (enabled) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  }, []);
 
   // 搜索状态
   const [searchQuery, setSearchQuery] = useState("");
@@ -132,7 +149,7 @@ export function DashboardContent({
                 <SubscriptionFilter
                   subscriptions={subscriptions}
                   selected={selectedSubIds}
-                  onSelectionChange={setSelectedSubIds}
+                  onToggle={handleToggle}
                 />
               </div>
             }

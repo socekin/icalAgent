@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { DashboardContent } from "@/components/dashboard-content";
 import { getAuthenticatedUser } from "@/lib/auth";
 import {
@@ -45,11 +46,13 @@ export default async function DashboardPage() {
           </p>
         </div>
       ) : (
-        <DashboardContent
-          subscriptions={subscriptions}
-          allEvents={allEvents}
-          masterFeedUrl={masterFeedUrl}
-        />
+        <Suspense>
+          <DashboardContent
+            subscriptions={subscriptions}
+            allEvents={allEvents}
+            masterFeedUrl={masterFeedUrl}
+          />
+        </Suspense>
       )}
     </div>
   );

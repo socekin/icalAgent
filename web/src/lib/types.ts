@@ -5,6 +5,7 @@ export type Subscription = {
   timezone: string;
   feedToken: string;
   updatedAt: string;
+  enabled: boolean;
 };
 
 export type CalendarEvent = {

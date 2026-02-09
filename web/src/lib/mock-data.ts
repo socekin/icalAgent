@@ -8,6 +8,7 @@ export const demoSubscriptions: Subscription[] = [
     timezone: "America/Los_Angeles",
     feedToken: "feed_lakers_2026_mock",
     updatedAt: "2026-02-06T10:00:00Z",
+    enabled: true,
   },
   {
     id: "sub_superbowl",
@@ -16,6 +17,7 @@ export const demoSubscriptions: Subscription[] = [
     timezone: "America/New_York",
     feedToken: "feed_super_bowl_mock",
     updatedAt: "2026-02-06T09:30:00Z",
+    enabled: true,
   },
   {
     id: "sub_movie_release",
@@ -24,6 +26,7 @@ export const demoSubscriptions: Subscription[] = [
     timezone: "America/Los_Angeles",
     feedToken: "feed_movie_release_mock",
     updatedAt: "2026-02-06T09:00:00Z",
+    enabled: true,
   },
 ];
 

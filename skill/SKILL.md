@@ -48,7 +48,7 @@ Authorization: Bearer <ICALAGENT_API_KEY>
 ```json
 {
   "subscription_key": "shanghai-weather-7d",
-  "display_name": "上海7日天气",
+  "display_name": "上海7日天气预报",
   "timezone": "Asia/Shanghai",
   "events": [
     {
@@ -71,7 +71,7 @@ Authorization: Bearer <ICALAGENT_API_KEY>
 | 字段 | 必填 | 说明 |
 |------|------|------|
 | subscription_key | 是 | 订阅唯一标识（同一 key 会更新而非重复创建） |
-| display_name | 是 | 显示名称 |
+| display_name | 是 | 显示名称（≤15 个汉字；因为本身就在日历中展示，名称中不要包含"日历"二字） |
 | timezone | 否 | 时区，默认 UTC |
 | events | 否 | 事件数组 |
 | events[].external_id | 是 | 事件唯一标识（同 subscription 下相同 external_id 会更新） |
@@ -139,7 +139,7 @@ curl -X POST "${ICALAGENT_BASE_URL}/api/subscriptions" \
   -H "Content-Type: application/json" \
   -d '{
     "subscription_key": "shanghai-weather-7d",
-    "display_name": "上海7日天气",
+    "display_name": "上海7日天气预报",
     "timezone": "Asia/Shanghai",
     "events": [
       {
