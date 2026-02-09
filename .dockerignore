@@ -2,7 +2,8 @@ node_modules
 .next
 .git
 .env
-.env.local
+.env*.local
+!web/.env.local
 *.md
 !skill/SKILL.md
 mcp-server/
