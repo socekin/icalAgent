@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck2, Globe2, ShieldCheck, Zap, ArrowRight } from "lucide-react";
+import { CalendarCheck2, Globe2, ShieldCheck, Zap, ArrowRight, Github } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,14 @@ export default async function HomePage() {
               <Badge variant="secondary" className="rounded-full px-4 py-1.5 text-xs font-medium tracking-wide">
                 iCalAgent v1.0
               </Badge>
-              <Badge variant="outline" className="rounded-full border-zinc-200 px-4 py-1.5 text-xs font-medium text-zinc-500">
-                AI Native
-              </Badge>
+              <Link
+                href="https://github.com/socekin/icalAgent"
+                target="_blank"
+                className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-50 transition-colors hover:bg-zinc-900/80"
+              >
+                <Github className="h-3.5 w-3.5" />
+                GitHub
+              </Link>
             </div>
 
             <h1 className="mx-auto max-w-4xl text-5xl font-bold tracking-tight text-zinc-950 sm:text-7xl">

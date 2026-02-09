@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Github } from "lucide-react";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
 
@@ -30,6 +31,14 @@ export default async function DashboardLayout({
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            <Link
+              href="https://github.com/socekin/icalAgent"
+              target="_blank"
+              className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-50 transition-colors hover:bg-zinc-900/80"
+            >
+              <Github className="h-3.5 w-3.5" />
+              GitHub
+            </Link>
             <span className="text-[11px] font-medium text-zinc-400">{user?.email}</span>
             <LogoutButton />
           </div>
