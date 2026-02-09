@@ -12,6 +12,12 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY web/ ./
+
+# NEXT_PUBLIC_* 在构建时内联到前端代码，通过 docker-compose args 从 .env 自动传入
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+
 RUN npm run build
 
 # 运行阶段
