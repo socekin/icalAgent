@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { getServiceRoleClient, setSessionCookies } from "@/lib/auth";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, turnstileToken } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: "请提供邮箱和密码" }, { status: 400 });
+    }
+
+    // 人机验证
+    if (!turnstileToken || !(await verifyTurnstileToken(turnstileToken))) {
+      return NextResponse.json({ error: "人机验证失败，请刷新页面重试" }, { status: 400 });
     }
 
     const supabase = getServiceRoleClient();
