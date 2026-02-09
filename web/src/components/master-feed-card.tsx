@@ -24,7 +24,7 @@ export function MasterFeedCard({ feedUrl }: { feedUrl: string }) {
           <Rss className="h-4 w-4 text-zinc-500" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-zinc-900">总体订阅</h3>
+          <h3 className="text-sm font-semibold text-zinc-900">所有日历</h3>
           <p className="text-[10px] text-zinc-500">
             在日历应用中添加此链接即可查看所有事件
           </p>

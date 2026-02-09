@@ -4,6 +4,7 @@ import { CalendarCheck2, Globe2, ShieldCheck, Zap, ArrowRight } from "lucide-rea
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAuthenticatedUser } from "@/lib/auth";
+import { AgentDemo } from "@/components/landing/agent-demo";
 
 export const dynamic = "force-dynamic";
 
@@ -35,11 +36,9 @@ export default async function HomePage() {
               日历订阅，<span className="text-zinc-400">从未如此简单</span>
             </h1>
 
-            <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-zinc-500">
-              让 AI 代理帮你搜索、过滤并自动维护日历。
-              <br className="hidden sm:block" />
-              任何你关心的事件，都能一键变为稳定、实时的极简订阅。
-            </p>
+            <div className="mx-auto mt-10 w-full max-w-2xl">
+              <AgentDemo />
+            </div>
 
             <div className="mt-12 flex flex-wrap justify-center gap-4">
               {user ? (
@@ -67,23 +66,23 @@ export default async function HomePage() {
           {[
             {
               icon: Zap,
-              title: "AI Skill 驱动",
-              desc: "AI 代理自动搜寻全球信息并同步至日历，解放双手。",
+              title: "AI Agent 驱动",
+              desc: "自动搜寻全球信息并同步至日历，覆盖全面，一句话就能订阅。",
             },
             {
               icon: Globe2,
               title: "全场景支持",
-              desc: "体育、影视、个人日程，基于通用协议，服务广阔场景。",
+              desc: "涵盖体育赛事、影视追剧、金融财报等，凡有时间属性的事件皆可订阅。",
             },
             {
               icon: CalendarCheck2,
-              title: "稳定 iCal 链接",
-              desc: "支持 Apple/Google/Outlook 多端拉取，一次订阅，终身维护。",
+              title: "实时在线日历",
+              desc: "支持 Apple/Google/Outlook 多端自动拉取，一次订阅，动态更新。",
             },
             {
               icon: ShieldCheck,
-              title: "隐私与溯源",
-              desc: "透明的事件来源追溯，安全隐私的订阅管理。",
+              title: "真实可靠",
+              desc: "事件来源透明可追溯，信息置信度一目了然，幻觉问题轻松辨认。",
             },
           ].map((feature, idx) => (
             <div

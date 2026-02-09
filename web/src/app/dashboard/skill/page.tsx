@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, Terminal, FileText, KeyRound } from "lucide-react";
+import { Download, Terminal, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -118,6 +118,9 @@ export default function SkillPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">安装指引</CardTitle>
+          <CardDescription>
+            下载的 SKILL.md 已包含 API 密钥和服务地址，放入对应目录即可使用。
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-3">
@@ -126,36 +129,20 @@ export default function SkillPage() {
               <h3 className="text-sm font-medium">Claude Code</h3>
             </div>
             <div className="rounded-md bg-zinc-50 p-3 font-mono text-xs text-zinc-700">
-              <p># 1. 创建 Skill 目录</p>
               <p>mkdir -p ~/.claude/skills/icalagent</p>
-              <p className="mt-2"># 2. 将下载的 SKILL.md 放入该目录</p>
               <p>mv ~/Downloads/SKILL.md ~/.claude/skills/icalagent/</p>
-              {keys.length > 0 && selectedKeyId ? (
-                <p className="mt-2 text-green-700">
-                  # 已嵌入密钥，无需额外配置环境变量
-                </p>
-              ) : (
-                <>
-                  <p className="mt-2"># 3. 设置环境变量</p>
-                  <p>export ICALAGENT_API_KEY=&quot;你的API密钥&quot;</p>
-                  <p>
-                    export ICALAGENT_BASE_URL=&quot;https://your-domain.com&quot;
-                  </p>
-                </>
-              )}
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-zinc-600" />
-              <h3 className="text-sm font-medium">其他 AI 客户端</h3>
+              <Terminal className="h-4 w-4 text-zinc-600" />
+              <h3 className="text-sm font-medium">Codex CLI</h3>
             </div>
-            <p className="text-sm text-zinc-600">
-              将 SKILL.md
-              的内容作为系统提示词（System Prompt）添加到你的 AI 客户端中，
-              并确保客户端支持 WebSearch 和 HTTP 请求能力。
-            </p>
+            <div className="rounded-md bg-zinc-50 p-3 font-mono text-xs text-zinc-700">
+              <p>mkdir -p ~/.codex/skills/icalagent</p>
+              <p>mv ~/Downloads/SKILL.md ~/.codex/skills/icalagent/</p>
+            </div>
           </div>
         </CardContent>
       </Card>
