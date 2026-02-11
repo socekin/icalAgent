@@ -1,9 +1,9 @@
 let warned = false;
 
 /**
- * Fire-and-forget Telegram 通知，不阻塞调用方
+ * 发送 Telegram 通知；失败时抛错，由调用方决定是否降级处理
  */
-export function notifyTelegram(message: string): void {
+export async function notifyTelegram(message: string): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -15,15 +15,15 @@ export function notifyTelegram(message: string): void {
     return;
   }
 
-  fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text: message }),
-  }).then((res) => {
-    if (!res.ok) {
-      res.text().then((body) => console.error(`[telegram] API 错误 ${res.status}:`, body));
-    }
-  }).catch((err) => {
-    console.error("[telegram] 发送失败:", err);
+    signal: AbortSignal.timeout(5000),
   });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`[telegram] API 错误 ${res.status}: ${body}`);
+  }
 }

@@ -35,7 +35,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    notifyTelegram(`📮 新用户注册: ${email}`);
+    try {
+      await notifyTelegram(`📮 新用户注册: ${email}`);
+    } catch (err) {
+      // 通知失败不影响注册主流程
+      console.error("[register] Telegram 通知失败:", err);
+    }
 
     // 注册成功后自动登录
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
