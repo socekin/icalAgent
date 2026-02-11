@@ -19,6 +19,10 @@ export function notifyTelegram(message: string): void {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text: message }),
+  }).then((res) => {
+    if (!res.ok) {
+      res.text().then((body) => console.error(`[telegram] API 错误 ${res.status}:`, body));
+    }
   }).catch((err) => {
     console.error("[telegram] 发送失败:", err);
   });
