@@ -138,6 +138,10 @@ API_KEY_ENCRYPTION_SECRET=your-random-string
 
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-site-key
 TURNSTILE_SECRET_KEY=your-secret-key
+
+# 可选：新用户注册时发送 Telegram 通知
+TELEGRAM_BOT_TOKEN=your-bot-token
+TELEGRAM_CHAT_ID=your-chat-id
 ```
 
 > `docker-compose.yml` 会自动从 `.env` 读取变量：运行时通过 `env_file` 注入容器，构建时通过 `args` 传入 `NEXT_PUBLIC_*` 变量（Next.js 要求这些变量在构建时内联到前端代码）。
@@ -201,7 +205,8 @@ iCalAgent/
 │   │       ├── subscription-service.ts  # 订阅服务
 │   │       ├── api-schemas.ts     #   Zod 请求验证
 │   │       ├── ics.ts             #   iCal 格式生成
-│   │       └── turnstile.ts       #   Turnstile 验证
+│   │       ├── turnstile.ts       #   Turnstile 验证
+│   │       └── telegram.ts        #   Telegram 通知（可选）
 ├── skill/
 │   └── SKILL.md                   # AI Skill 指令文件
 ├── supabase/

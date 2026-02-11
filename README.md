@@ -138,6 +138,10 @@ API_KEY_ENCRYPTION_SECRET=your-random-string
 
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-site-key
 TURNSTILE_SECRET_KEY=your-secret-key
+
+# Optional: Telegram notification on new user registration
+TELEGRAM_BOT_TOKEN=your-bot-token
+TELEGRAM_CHAT_ID=your-chat-id
 ```
 
 > `docker-compose.yml` reads variables from `.env` automatically: runtime variables are injected via `env_file`, while `NEXT_PUBLIC_*` variables are passed as build `args` (Next.js requires these to be inlined at build time).
@@ -201,7 +205,8 @@ iCalAgent/
 │   │       ├── subscription-service.ts  # Subscription service
 │   │       ├── api-schemas.ts     #   Zod request validation
 │   │       ├── ics.ts             #   iCal format generation
-│   │       └── turnstile.ts       #   Turnstile verification
+│   │       ├── turnstile.ts       #   Turnstile verification
+│   │       └── telegram.ts        #   Telegram notification (optional)
 ├── skill/
 │   └── SKILL.md                   # AI Skill instruction file
 ├── supabase/
