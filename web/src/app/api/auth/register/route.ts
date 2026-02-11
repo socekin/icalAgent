@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServiceRoleClient, setSessionCookies } from "@/lib/auth";
 import { verifyTurnstileToken } from "@/lib/turnstile";
+import { notifyTelegram } from "@/lib/telegram";
 
 export async function POST(request: Request) {
   try {
@@ -33,6 +34,8 @@ export async function POST(request: Request) {
       }
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    notifyTelegram(`📮 新用户注册: ${email}`);
 
     // 注册成功后自动登录
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
