@@ -4,6 +4,7 @@ import { ArrowLeft, Link2 } from "lucide-react";
 
 import { CalendarView } from "@/components/calendar-view";
 import { CopyFeedButton } from "@/components/copy-feed-button";
+import { DeleteSubscriptionButton } from "@/components/delete-subscription-button";
 import { EventTable } from "@/components/event-table";
 import {
   getEventsBySubscriptionId,
@@ -82,6 +83,10 @@ export default async function SubscriptionDetailPage({
             {feedUrl}
           </code>
           <CopyFeedButton feedUrl={feedUrl} />
+          <DeleteSubscriptionButton
+            subscriptionId={subscription.id}
+            displayName={subscription.displayName}
+          />
         </div>
       </div>
 

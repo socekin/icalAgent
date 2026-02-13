@@ -43,8 +43,17 @@ function getStartDayOfMonth(year: number, month: number): number {
   return day === 0 ? 6 : day - 1;
 }
 
-// 将日期转为 YYYY-MM-DD 格式的 key
-function toDateKey(date: Date): string {
+// 将日期转为 YYYY-MM-DD 格式的 key（支持时区）
+function toDateKey(date: Date, timezone?: string): string {
+  if (timezone) {
+    // en-CA locale outputs YYYY-MM-DD format
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(date);
+  }
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
@@ -82,7 +91,8 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
 
     for (const event of events) {
       const start = new Date(event.startAt);
-      const startKey = toDateKey(start);
+      const tz = event.timezone || undefined;
+      const startKey = toDateKey(start, tz);
       addToDate(startKey, event);
 
       // 如果有 endAt 且跨天，在中间每一天也加入该事件
@@ -93,7 +103,7 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
         cursor.setHours(0, 0, 0, 0);
         cursor.setDate(cursor.getDate() + 1);
         while (cursor <= end) {
-          const key = toDateKey(cursor);
+          const key = toDateKey(cursor, tz);
           if (key !== startKey) {
             addToDate(key, event);
           }
@@ -284,11 +294,21 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
                 const subName = "subscriptionName" in evt && evt.subscriptionName
                   ? evt.subscriptionName
                   : subscriptionName;
-                const time = new Date(evt.startAt).toLocaleTimeString("zh-CN", {
+                const startTime = new Date(evt.startAt).toLocaleTimeString("zh-CN", {
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: false,
+                  timeZone: evt.timezone,
                 });
+                const endTime = evt.endAt
+                  ? new Date(evt.endAt).toLocaleTimeString("zh-CN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: evt.timezone,
+                    })
+                  : null;
+                const time = endTime ? `${startTime} – ${endTime}` : startTime;
 
                 return (
                   <div key={evt.id} className="flex items-start gap-3 rounded-lg border border-zinc-200 p-3">

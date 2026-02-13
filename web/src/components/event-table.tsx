@@ -30,7 +30,7 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
         <TableHeader>
           <TableRow className="border-b-zinc-100 hover:bg-transparent">
             <TableHead className="h-9 text-xs font-medium text-zinc-500">事件标题</TableHead>
-            <TableHead className="h-9 text-xs font-medium text-zinc-500">开始时间</TableHead>
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">时间</TableHead>
             <TableHead className="h-9 text-xs font-medium text-zinc-500">状态</TableHead>
             <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">来源</TableHead>
           </TableRow>
@@ -46,7 +46,21 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
                   hour: "numeric",
                   minute: "numeric",
                   hour12: false,
+                  timeZone: event.timezone,
                 })}
+                {event.endAt && (
+                  <span className="text-zinc-400">
+                    {" – "}
+                    {new Date(event.endAt).toLocaleString("zh-CN", {
+                      month: "numeric",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "numeric",
+                      hour12: false,
+                      timeZone: event.timezone,
+                    })}
+                  </span>
+                )}
               </TableCell>
               <TableCell className="py-2.5">
                 <Badge variant="outline" className="rounded-md border-zinc-200 px-1.5 py-0 text-[10px] font-normal text-zinc-600">

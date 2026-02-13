@@ -109,9 +109,17 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = await authenticateRequest(request);
-  if ("error" in auth) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  // 优先尝试 cookie session 认证，失败则 fallback 到 API key 认证
+  let userId: string;
+  const user = await getAuthenticatedUser();
+  if (user) {
+    userId = user.id;
+  } else {
+    const auth = await authenticateRequest(request);
+    if ("error" in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+    userId = auth.userId;
   }
 
   const { id } = await params;
@@ -122,7 +130,7 @@ export async function DELETE(
     .from("subscriptions")
     .select("id, user_id")
     .eq("id", id)
-    .eq("user_id", auth.userId)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (!subscription) {
