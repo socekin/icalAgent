@@ -1,53 +1,31 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { ArrowLeft, Github } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { t, getClientLocale, type Locale } from "@/i18n";
+import { createBrowserClient } from "@/lib/supabase-browser";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const callbackError = searchParams.get("error");
 
   const [locale] = useState<Locale>(getClientLocale);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error] = useState(callbackError || "");
   const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
+  async function handleGitHubLogin() {
     setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, turnstileToken }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || t(locale, "auth.login.failed"));
-        return;
-      }
-
-      router.push(redirect);
-      router.refresh();
-    } catch {
-      setError(t(locale, "auth.login.networkError"));
-    } finally {
-      setLoading(false);
-    }
+    const supabase = createBrowserClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
   }
 
   return (
@@ -56,56 +34,21 @@ function LoginForm() {
         <CardTitle className="text-xl">{t(locale, "auth.login.title")}</CardTitle>
         <CardDescription>{t(locale, "auth.login.description")}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              {t(locale, "auth.login.email")}
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+      <CardContent className="space-y-4">
+        {error && (
+          <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+            {error}
           </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              {t(locale, "auth.login.password")}
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder={t(locale, "auth.login.passwordPlaceholder")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={setTurnstileToken}
-            onError={() => setTurnstileToken("")}
-            onExpire={() => setTurnstileToken("")}
-            options={{ theme: "light", size: "normal", language: locale === "zh-CN" ? "zh-cn" : "en" }}
-          />
-          <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
-            {loading ? t(locale, "auth.login.submitting") : t(locale, "auth.login.submit")}
-          </Button>
-          <p className="text-center text-sm text-zinc-600">
-            {t(locale, "auth.login.noAccount")}
-            <Link href="/register" className="font-medium text-zinc-900 underline underline-offset-4">
-              {t(locale, "auth.login.register")}
-            </Link>
-          </p>
-        </form>
+        )}
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={handleGitHubLogin}
+          disabled={loading}
+        >
+          <Github className="mr-2 h-5 w-5" />
+          {loading ? t(locale, "auth.login.signingIn") : t(locale, "auth.login.withGitHub")}
+        </Button>
       </CardContent>
     </Card>
   );

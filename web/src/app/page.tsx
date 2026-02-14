@@ -61,14 +61,9 @@ export default async function HomePage() {
                   </Link>
                 </Button>
               ) : (
-                <>
-                  <Button asChild size="lg" className="h-14 rounded-full px-10 text-base font-semibold premium-hover">
-                    <Link href="/register">{t(locale, "landing.cta.getStarted")}</Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg" className="h-14 rounded-full border-zinc-200 px-10 text-base font-semibold hover:bg-zinc-50">
-                    <Link href="/login">{t(locale, "landing.cta.login")}</Link>
-                  </Button>
-                </>
+                <Button asChild size="lg" className="h-14 rounded-full px-10 text-base font-semibold premium-hover">
+                  <Link href="/login">{t(locale, "landing.cta.getStarted")}</Link>
+                </Button>
               )}
             </div>
           </div>
