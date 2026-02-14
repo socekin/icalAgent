@@ -25,8 +25,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { ApiKey } from "@/lib/types";
+import { t, getClientLocale, type Locale } from "@/i18n";
 
 export default function KeysPage() {
+  const [locale] = useState<Locale>(getClientLocale);
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -59,7 +61,7 @@ export default function KeysPage() {
       const res = await fetch("/api/keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newKeyName || "默认密钥" }),
+        body: JSON.stringify({ name: newKeyName || t(locale, "keys.createDialog.defaultName") }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -99,11 +101,11 @@ export default function KeysPage() {
         setTimeout(() => setCopiedKeyId(null), 2000);
       } else {
         setCopiedKeyId(null);
-        alert(data.error || "无法获取密钥");
+        alert(data.error || t(locale, "keys.error.cannotReveal"));
       }
     } catch {
       setCopiedKeyId(null);
-      alert("网络错误");
+      alert(t(locale, "keys.error.network"));
     }
   }
 
@@ -119,9 +121,9 @@ export default function KeysPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-zinc-950">API 密钥</h1>
+          <h1 className="text-xl font-semibold text-zinc-950">{t(locale, "keys.title")}</h1>
           <p className="mt-1 text-sm text-zinc-600">
-            管理用于 Skill 和 REST API 调用的密钥
+            {t(locale, "keys.description")}
           </p>
         </div>
 
@@ -129,37 +131,37 @@ export default function KeysPage() {
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="h-4 w-4" />
-              创建密钥
+              {t(locale, "keys.create")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             {!createdKey ? (
               <>
                 <DialogHeader>
-                  <DialogTitle>创建 API 密钥</DialogTitle>
+                  <DialogTitle>{t(locale, "keys.createDialog.title")}</DialogTitle>
                   <DialogDescription>
-                    为密钥设置一个名称以便识别
+                    {t(locale, "keys.createDialog.description")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-2">
                   <Input
-                    placeholder="密钥名称（可选）"
+                    placeholder={t(locale, "keys.createDialog.placeholder")}
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
                   />
                 </div>
                 <DialogFooter>
                   <Button onClick={handleCreate} disabled={creating}>
-                    {creating ? "创建中..." : "创建"}
+                    {creating ? t(locale, "keys.createDialog.creating") : t(locale, "keys.createDialog.submit")}
                   </Button>
                 </DialogFooter>
               </>
             ) : (
               <>
                 <DialogHeader>
-                  <DialogTitle>密钥已创建</DialogTitle>
+                  <DialogTitle>{t(locale, "keys.createdDialog.title")}</DialogTitle>
                   <DialogDescription>
-                    请立即复制密钥，关闭后将无法再次查看完整密钥。
+                    {t(locale, "keys.createdDialog.description")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-2">
@@ -168,12 +170,12 @@ export default function KeysPage() {
                   </code>
                   <Button variant="outline" size="sm" className="w-full" onClick={handleCopy}>
                     <Copy className="h-4 w-4" />
-                    {copied ? "已复制" : "复制密钥"}
+                    {copied ? t(locale, "keys.createdDialog.copied") : t(locale, "keys.createdDialog.copy")}
                   </Button>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => handleDialogClose(false)}>
-                    关闭
+                    {t(locale, "keys.createdDialog.close")}
                   </Button>
                 </DialogFooter>
               </>
@@ -184,18 +186,18 @@ export default function KeysPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">已创建的密钥</CardTitle>
+          <CardTitle className="text-base">{t(locale, "keys.list.title")}</CardTitle>
           <CardDescription>
-            密钥用于通过 REST API 调用 iCalAgent 服务
+            {t(locale, "keys.list.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="py-4 text-center text-sm text-zinc-500">加载中...</p>
+            <p className="py-4 text-center text-sm text-zinc-500">{t(locale, "keys.list.loading")}</p>
           ) : keys.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-zinc-500">
               <Key className="h-8 w-8" />
-              <p className="text-sm">还没有创建任何密钥</p>
+              <p className="text-sm">{t(locale, "keys.list.empty")}</p>
             </div>
           ) : (
             <div className="divide-y">
@@ -209,15 +211,15 @@ export default function KeysPage() {
                       <span className="text-sm font-medium">{k.name}</span>
                       {k.revokedAt && (
                         <span className="rounded bg-red-50 px-1.5 py-0.5 text-xs text-red-600">
-                          已吊销
+                          {t(locale, "keys.list.revoked")}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-zinc-500">
                       <code>{k.keyPrefix}...</code>
                       <span>
-                        创建于{" "}
-                        {new Date(k.createdAt).toLocaleDateString("zh-CN")}
+                        {t(locale, "keys.list.createdAt")}{" "}
+                        {new Date(k.createdAt).toLocaleDateString(locale)}
                       </span>
                     </div>
                   </div>
@@ -227,10 +229,10 @@ export default function KeysPage() {
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => handleCopyKey(k.id)}
-                        title="复制密钥"
+                        title={t(locale, "keys.list.copyTitle")}
                       >
                         {copiedKeyId === k.id ? (
-                          <span className="text-xs text-green-600">已复制</span>
+                          <span className="text-xs text-green-600">{t(locale, "keys.list.copied")}</span>
                         ) : (
                           <Copy className="h-4 w-4 text-zinc-500" />
                         )}
@@ -241,7 +243,7 @@ export default function KeysPage() {
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => setRevokeTarget(k)}
-                        title="吊销密钥"
+                        title={t(locale, "keys.list.revokeTitle")}
                       >
                         <Trash2 className="h-4 w-4 text-zinc-500" />
                       </Button>
@@ -257,15 +259,17 @@ export default function KeysPage() {
       <AlertDialog open={!!revokeTarget} onOpenChange={(open) => !open && setRevokeTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确认吊销密钥</AlertDialogTitle>
+            <AlertDialogTitle>{t(locale, "keys.revoke.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              密钥「{revokeTarget?.name}」（{revokeTarget?.keyPrefix}...）吊销后将立即失效，使用该密钥的所有服务将无法继续访问。此操作不可撤销。
+              {t(locale, "keys.revoke.description")
+                .replace("{name}", revokeTarget?.name ?? "")
+                .replace("{prefix}", revokeTarget?.keyPrefix ?? "")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogCancel>{t(locale, "keys.revoke.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleRevokeConfirm} className="bg-red-600 hover:bg-red-700">
-              确认吊销
+              {t(locale, "keys.revoke.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

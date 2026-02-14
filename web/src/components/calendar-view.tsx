@@ -6,8 +6,9 @@ import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent, CalendarEventWithSub } from "@/lib/types";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
-// 订阅颜色调色板（按名称哈希分配）
 const colorPalette = [
   { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
   { bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-500" },
@@ -30,23 +31,17 @@ export function getSubscriptionColor(name: string) {
   return colorPalette[Math.abs(hash) % colorPalette.length];
 }
 
-const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
-
-// 获取某月的天数
 function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
 }
 
-// 获取某月第一天是周几（周一=0, 周日=6）
 function getStartDayOfMonth(year: number, month: number): number {
   const day = new Date(year, month, 1).getDay();
   return day === 0 ? 6 : day - 1;
 }
 
-// 将日期转为 YYYY-MM-DD 格式的 key（支持时区）
 function toDateKey(date: Date, timezone?: string): string {
   if (timezone) {
-    // en-CA locale outputs YYYY-MM-DD format
     return new Intl.DateTimeFormat("en-CA", {
       timeZone: timezone,
       year: "numeric",
@@ -68,15 +63,19 @@ type CalendarViewProps = {
   events: EventItem[];
   subscriptionName?: string;
   actions?: React.ReactNode;
+  locale: Locale;
 };
 
-export function CalendarView({ events, subscriptionName, actions }: CalendarViewProps) {
+const MONTH_NAMES_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+export function CalendarView({ events, subscriptionName, actions, locale }: CalendarViewProps) {
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // 按日期分组事件（跨天事件会出现在每一天）
+  const weekdays = t(locale, "calendar.weekdays").split(",");
+
   const eventsByDate = useMemo(() => {
     const map = new Map<string, EventItem[]>();
 
@@ -95,10 +94,8 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
       const startKey = toDateKey(start, tz);
       addToDate(startKey, event);
 
-      // 如果有 endAt 且跨天，在中间每一天也加入该事件
       if (event.endAt) {
         const end = new Date(event.endAt);
-        // 从 startAt 次日 00:00 开始逐日检查
         const cursor = new Date(start);
         cursor.setHours(0, 0, 0, 0);
         cursor.setDate(cursor.getDate() + 1);
@@ -144,7 +141,6 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
     setSelectedDate(null);
   }
 
-  // 构建日历格子
   const cells: (number | null)[] = [];
   for (let i = 0; i < startDay; i++) {
     cells.push(null);
@@ -153,14 +149,14 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
     cells.push(d);
   }
 
-  // 选中日期的事件列表
   const selectedEvents = selectedDate ? (eventsByDate.get(selectedDate) ?? []) : [];
 
-  const monthLabel = `${currentYear}年${currentMonth + 1}月`;
+  const monthLabel = locale === "zh-CN"
+    ? `${currentYear}年${currentMonth + 1}月`
+    : `${MONTH_NAMES_EN[currentMonth]} ${currentYear}`;
 
   return (
     <div className="overflow-hidden rounded-3xl border border-zinc-100 bg-white shadow-sm">
-      {/* 头部：标题 + 导航 + 操作区 */}
       <div className="flex flex-col gap-3 border-b border-zinc-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-bold tracking-tight text-zinc-950">{monthLabel}</h2>
@@ -192,7 +188,7 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
               className="h-7 animate-in fade-in zoom-in-95 rounded-full border-zinc-200 px-3 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
             >
               <RotateCcw className="mr-1 h-3 w-3" />
-              回到今天
+              {t(locale, "calendar.backToToday")}
             </Button>
           )}
         </div>
@@ -204,16 +200,14 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
         )}
       </div>
 
-      {/* 星期标题行 */}
       <div className="grid grid-cols-7 border-b border-zinc-100 bg-zinc-50/30">
-        {WEEKDAYS.map((day) => (
+        {weekdays.map((day) => (
           <div key={day} className="py-2 text-center text-[10px] font-medium text-zinc-400">
             {day}
           </div>
         ))}
       </div>
 
-      {/* 日期格子 */}
       <div className="grid grid-cols-7">
         {cells.map((day, idx) => {
           if (day === null) {
@@ -250,7 +244,6 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
                   <span className="text-[10px] text-zinc-400">+{dayEvents.length - 2}</span>
                 )}
               </div>
-              {/* 事件指示条（最多显示 2 条） */}
               <div className="mt-0.5 space-y-0.5">
                 {dayEvents.slice(0, 2).map((evt) => {
                   const name = "subscriptionName" in evt && evt.subscriptionName
@@ -276,14 +269,13 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
         })}
       </div>
 
-      {/* 选中日期的事件详情 */}
       {selectedDate && (
         <div className="border-t border-zinc-200 p-4">
           <h3 className="mb-3 text-sm font-semibold text-zinc-900">
-            {selectedDate} 的事件
+            {selectedDate}{t(locale, "calendar.eventsOfDate")}
           </h3>
           {selectedEvents.length === 0 ? (
-            <p className="text-xs text-zinc-500">当天没有事件</p>
+            <p className="text-xs text-zinc-500">{t(locale, "calendar.noEvents")}</p>
           ) : (
             <div className="space-y-2">
               {selectedEvents.map((evt) => {
@@ -294,14 +286,14 @@ export function CalendarView({ events, subscriptionName, actions }: CalendarView
                 const subName = "subscriptionName" in evt && evt.subscriptionName
                   ? evt.subscriptionName
                   : subscriptionName;
-                const startTime = new Date(evt.startAt).toLocaleTimeString("zh-CN", {
+                const startTime = new Date(evt.startAt).toLocaleTimeString(locale, {
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: false,
                   timeZone: evt.timezone,
                 });
                 const endTime = evt.endAt
-                  ? new Date(evt.endAt).toLocaleTimeString("zh-CN", {
+                  ? new Date(evt.endAt).toLocaleTimeString(locale, {
                       hour: "2-digit",
                       minute: "2-digit",
                       hour12: false,

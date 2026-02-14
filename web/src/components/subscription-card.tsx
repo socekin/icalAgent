@@ -9,8 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Subscription } from "@/lib/types";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
-export function SubscriptionCard({ subscription }: { subscription: Subscription }) {
+export function SubscriptionCard({ subscription, locale }: { subscription: Subscription; locale: Locale }) {
   return (
     <Card className="group relative overflow-hidden rounded-2xl border-zinc-100 bg-white transition-all duration-300 hover:border-zinc-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
       <CardHeader className="pb-2 px-4 pt-4">
@@ -42,7 +44,7 @@ export function SubscriptionCard({ subscription }: { subscription: Subscription 
           href={`/dashboard/subscriptions/${subscription.id}`}
           className="flex items-center gap-0.5 text-[10px] font-bold text-zinc-900 transition-colors hover:text-zinc-600"
         >
-          详情
+          {t(locale, "subscription.details")}
           <ChevronRight className="h-2.5 w-2.5" />
         </Link>
       </CardFooter>

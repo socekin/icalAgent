@@ -14,17 +14,21 @@ import {
 import { getSubscriptionColor } from "@/components/calendar-view";
 import { cn } from "@/lib/utils";
 import type { Subscription } from "@/lib/types";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
 type SubscriptionFilterProps = {
   subscriptions: Subscription[];
   selected: Set<string>;
   onToggle: (id: string, enabled: boolean) => void;
+  locale: Locale;
 };
 
 export function SubscriptionFilter({
   subscriptions,
   selected,
   onToggle,
+  locale,
 }: SubscriptionFilterProps) {
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState<string | null>(null);
@@ -55,15 +59,14 @@ export function SubscriptionFilter({
         body: JSON.stringify({ enabled }),
       });
       if (!res.ok) {
-        // 失败回滚
         onToggle(id, !enabled);
-        showToast("保存失败，请重试");
+        showToast(t(locale, "filter.saveFailed"));
         return;
       }
-      showToast("已保存，订阅将即时生效");
+      showToast(t(locale, "filter.saved"));
     } catch {
       onToggle(id, !enabled);
-      showToast("网络错误，请重试");
+      showToast(t(locale, "filter.networkError"));
     } finally {
       setSavingIds((prev) => {
         const next = new Set(prev);
@@ -81,7 +84,6 @@ export function SubscriptionFilter({
 
   async function toggleAll() {
     if (allSelected) {
-      // 全部取消
       for (const sub of subscriptions) {
         if (selected.has(sub.id)) {
           onToggle(sub.id, false);
@@ -89,7 +91,6 @@ export function SubscriptionFilter({
         }
       }
     } else {
-      // 全选
       for (const sub of subscriptions) {
         if (!selected.has(sub.id)) {
           onToggle(sub.id, true);
@@ -99,16 +100,16 @@ export function SubscriptionFilter({
     }
   }
 
-  // 触发按钮的标签文案
   const label = noneSelected
-    ? "筛选日历"
+    ? t(locale, "filter.filterCalendars")
     : allSelected
-      ? "全部日历"
-      : `已选 ${selected.size}/${subscriptions.length}`;
+      ? t(locale, "filter.allCalendars")
+      : t(locale, "filter.selected")
+          .replace("{selected}", String(selected.size))
+          .replace("{total}", String(subscriptions.length));
 
   return (
     <>
-      {/* 浮动提示 */}
       {toast && (
         <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-xs text-white shadow-lg">
@@ -126,12 +127,11 @@ export function SubscriptionFilter({
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-64 p-0">
-          {/* 搜索栏 */}
           <div className="border-b border-zinc-200 p-2">
             <div className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
               <Input
-                placeholder="搜索日历..."
+                placeholder={t(locale, "filter.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-8 pl-8 text-xs"
@@ -139,7 +139,6 @@ export function SubscriptionFilter({
             </div>
           </div>
 
-          {/* 全选/取消 */}
           {!search.trim() && (
             <div
               role="option"
@@ -151,15 +150,14 @@ export function SubscriptionFilter({
                 checked={allSelected}
                 onCheckedChange={toggleAll}
               />
-              全部
+              {t(locale, "filter.all")}
             </div>
           )}
 
-          {/* 订阅列表 */}
           <div className="max-h-60 overflow-y-auto py-1">
             {filtered.length === 0 ? (
               <p className="px-3 py-4 text-center text-xs text-zinc-400">
-                无匹配结果
+                {t(locale, "filter.noMatch")}
               </p>
             ) : (
               filtered.map((sub) => {

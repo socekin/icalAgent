@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
+import { getLocale, t } from "@/i18n";
 import "./globals.css";
 
 const displaySans = Inter({
@@ -13,18 +13,22 @@ const bodyMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "iCalAgent | AI 日历订阅",
-  description: "通用 AI 日历订阅平台",
-};
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return {
+    title: t(locale, "meta.title"),
+    description: t(locale, "meta.description"),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
-    <html lang="zh-CN">
+    <html lang={locale}>
       <body className={`${displaySans.variable} ${bodyMono.variable} antialiased`}>
         {children}
       </body>

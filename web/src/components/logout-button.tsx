@@ -1,8 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
-export function LogoutButton() {
+export function LogoutButton({ locale }: { locale: Locale }) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -16,7 +18,7 @@ export function LogoutButton() {
       onClick={handleLogout}
       className="text-xs text-zinc-500 hover:text-zinc-900"
     >
-      退出
+      {t(locale, "nav.logout")}
     </button>
   );
 }

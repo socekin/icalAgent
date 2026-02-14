@@ -12,31 +12,32 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { CalendarEventWithSub, Subscription } from "@/lib/types";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
 
 type DashboardContentProps = {
   subscriptions: Subscription[];
   allEvents: CalendarEventWithSub[];
   masterFeedUrl: string | null;
+  locale: Locale;
 };
 
 export function DashboardContent({
   subscriptions,
   allEvents,
   masterFeedUrl,
+  locale,
 }: DashboardContentProps) {
-  // Tab 状态：从 URL ?tab= 参数初始化
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(
     () => searchParams.get("tab") === "subscriptions" ? "subscriptions" : "calendar",
   );
 
-  // 过滤器状态：从 enabled 字段构建初始值
   const [selectedSubIds, setSelectedSubIds] = useState<Set<string>>(
     () => new Set(subscriptions.filter((s) => s.enabled).map((s) => s.id)),
   );
 
-  // 单个订阅 toggle，同步更新本地 state
   const handleToggle = useCallback((id: string, enabled: boolean) => {
     setSelectedSubIds((prev) => {
       const next = new Set(prev);
@@ -49,17 +50,14 @@ export function DashboardContent({
     });
   }, []);
 
-  // 搜索状态
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
-  // 按选中订阅过滤事件
   const filteredEvents = useMemo(
     () => allEvents.filter((e) => selectedSubIds.has(e.subscriptionId)),
     [allEvents, selectedSubIds],
   );
 
-  // 按搜索词过滤订阅卡片
   const filteredSubscriptions = useMemo(() => {
     if (!searchQuery.trim()) return subscriptions;
     const q = searchQuery.toLowerCase();
@@ -78,17 +76,16 @@ export function DashboardContent({
             value="calendar"
             className="rounded-full px-4 py-1 text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
-            日历预览
+            {t(locale, "dashboard.tab.calendar")}
           </TabsTrigger>
           <TabsTrigger
             value="subscriptions"
             className="rounded-full px-4 py-1 text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
-            我的订阅 ({subscriptions.length})
+            {t(locale, "dashboard.tab.subscriptions")} ({subscriptions.length})
           </TabsTrigger>
         </TabsList>
 
-        {/* 仅在“我的订阅”标签页显示搜索 */}
         {activeTab === "subscriptions" && (
           <div
             className={cn(
@@ -114,7 +111,7 @@ export function DashboardContent({
                   <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
                   <Input
                     autoFocus
-                    placeholder="搜索订阅..."
+                    placeholder={t(locale, "dashboard.search.placeholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onBlur={() => {
@@ -139,17 +136,19 @@ export function DashboardContent({
       </div>
 
       <TabsContent value="calendar" className="mt-4 space-y-4 animate-in fade-in duration-500">
-        {masterFeedUrl && <MasterFeedCard feedUrl={masterFeedUrl} />}
+        {masterFeedUrl && <MasterFeedCard feedUrl={masterFeedUrl} locale={locale} />}
 
         <div className="mt-0">
           <CalendarView
             events={filteredEvents}
+            locale={locale}
             actions={
               <div className="w-full sm:w-auto">
                 <SubscriptionFilter
                   subscriptions={subscriptions}
                   selected={selectedSubIds}
                   onToggle={handleToggle}
+                  locale={locale}
                 />
               </div>
             }
@@ -161,7 +160,7 @@ export function DashboardContent({
         {filteredSubscriptions.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-200 bg-zinc-50/50 py-20">
             <p className="text-sm font-medium text-zinc-500">
-              {searchQuery ? "没有匹配的订阅" : "还没有任何订阅"}
+              {searchQuery ? t(locale, "dashboard.search.noMatch") : t(locale, "dashboard.search.empty")}
             </p>
           </div>
         ) : (
@@ -170,6 +169,7 @@ export function DashboardContent({
               <SubscriptionCard
                 key={subscription.id}
                 subscription={subscription}
+                locale={locale}
               />
             ))}
           </div>

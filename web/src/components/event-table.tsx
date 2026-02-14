@@ -8,18 +8,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { CalendarEvent } from "@/lib/types";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
-const statusLabelMap: Record<CalendarEvent["status"], string> = {
-  scheduled: "已排期",
-  cancelled: "已取消",
-  postponed: "已延期",
-};
+export function EventTable({ events, locale }: { events: CalendarEvent[]; locale: Locale }) {
+  const statusLabelMap: Record<CalendarEvent["status"], string> = {
+    scheduled: t(locale, "eventTable.status.scheduled"),
+    cancelled: t(locale, "eventTable.status.cancelled"),
+    postponed: t(locale, "eventTable.status.postponed"),
+  };
 
-export function EventTable({ events }: { events: CalendarEvent[] }) {
   if (!events.length) {
     return (
       <div className="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50/50 p-8 text-center text-sm text-zinc-500">
-        当前订阅还没有可展示的事件。
+        {t(locale, "eventTable.empty")}
       </div>
     );
   }
@@ -29,10 +31,10 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
       <Table>
         <TableHeader>
           <TableRow className="border-b-zinc-100 hover:bg-transparent">
-            <TableHead className="h-9 text-xs font-medium text-zinc-500">事件标题</TableHead>
-            <TableHead className="h-9 text-xs font-medium text-zinc-500">时间</TableHead>
-            <TableHead className="h-9 text-xs font-medium text-zinc-500">状态</TableHead>
-            <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">来源</TableHead>
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">{t(locale, "eventTable.colTitle")}</TableHead>
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">{t(locale, "eventTable.colTime")}</TableHead>
+            <TableHead className="h-9 text-xs font-medium text-zinc-500">{t(locale, "eventTable.colStatus")}</TableHead>
+            <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">{t(locale, "eventTable.colSource")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -40,7 +42,7 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
             <TableRow key={event.id} className="border-b-zinc-50 hover:bg-zinc-50/50">
               <TableCell className="py-2.5 font-medium text-sm text-zinc-700">{event.title}</TableCell>
               <TableCell className="py-2.5 font-mono text-xs text-zinc-500">
-                {new Date(event.startAt).toLocaleString("zh-CN", {
+                {new Date(event.startAt).toLocaleString(locale, {
                   month: "numeric",
                   day: "numeric",
                   hour: "numeric",
@@ -51,7 +53,7 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
                 {event.endAt && (
                   <span className="text-zinc-400">
                     {" – "}
-                    {new Date(event.endAt).toLocaleString("zh-CN", {
+                    {new Date(event.endAt).toLocaleString(locale, {
                       month: "numeric",
                       day: "numeric",
                       hour: "numeric",
@@ -74,7 +76,7 @@ export function EventTable({ events }: { events: CalendarEvent[] }) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  查看
+                  {t(locale, "eventTable.viewSource")}
                 </a>
               </TableCell>
             </TableRow>

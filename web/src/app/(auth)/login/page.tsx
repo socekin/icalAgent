@@ -8,12 +8,14 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { t, getClientLocale, type Locale } from "@/i18n";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
 
+  const [locale] = useState<Locale>(getClientLocale);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,14 +37,14 @@ function LoginForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "登录失败");
+        setError(data.error || t(locale, "auth.login.failed"));
         return;
       }
 
       router.push(redirect);
       router.refresh();
     } catch {
-      setError("网络错误，请重试");
+      setError(t(locale, "auth.login.networkError"));
     } finally {
       setLoading(false);
     }
@@ -51,8 +53,8 @@ function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">登录 iCalAgent</CardTitle>
-        <CardDescription>使用邮箱和密码登录你的账户</CardDescription>
+        <CardTitle className="text-xl">{t(locale, "auth.login.title")}</CardTitle>
+        <CardDescription>{t(locale, "auth.login.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -63,7 +65,7 @@ function LoginForm() {
           )}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              邮箱
+              {t(locale, "auth.login.email")}
             </label>
             <Input
               id="email"
@@ -76,12 +78,12 @@ function LoginForm() {
           </div>
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              密码
+              {t(locale, "auth.login.password")}
             </label>
             <Input
               id="password"
               type="password"
-              placeholder="至少 6 个字符"
+              placeholder={t(locale, "auth.login.passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -92,15 +94,15 @@ function LoginForm() {
             onSuccess={setTurnstileToken}
             onError={() => setTurnstileToken("")}
             onExpire={() => setTurnstileToken("")}
-            options={{ theme: "light", size: "normal", language: "zh-cn" }}
+            options={{ theme: "light", size: "normal", language: locale === "zh-CN" ? "zh-cn" : "en" }}
           />
           <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
-            {loading ? "登录中..." : "登录"}
+            {loading ? t(locale, "auth.login.submitting") : t(locale, "auth.login.submit")}
           </Button>
           <p className="text-center text-sm text-zinc-600">
-            还没有账户？{" "}
+            {t(locale, "auth.login.noAccount")}
             <Link href="/register" className="font-medium text-zinc-900 underline underline-offset-4">
-              注册
+              {t(locale, "auth.login.register")}
             </Link>
           </p>
         </form>
@@ -110,6 +112,8 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const [locale] = useState<Locale>(getClientLocale);
+
   return (
     <div className="flex min-h-dvh w-full items-center justify-center p-4">
       <div className="w-full max-w-sm">
@@ -117,7 +121,7 @@ export default function LoginPage() {
           <Button variant="ghost" size="sm" asChild className="text-zinc-500 hover:text-zinc-900">
             <Link href="/">
               <ArrowLeft className="mr-1.5 h-4 w-4" />
-              返回首页
+              {t(locale, "auth.login.backHome")}
             </Link>
           </Button>
         </div>

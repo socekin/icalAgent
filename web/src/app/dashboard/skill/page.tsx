@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import type { ApiKey } from "@/lib/types";
+import { t, getClientLocale, type Locale } from "@/i18n";
 
 export default function SkillPage() {
+  const [locale] = useState<Locale>(getClientLocale);
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [selectedKeyId, setSelectedKeyId] = useState("");
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,6 @@ export default function SkillPage() {
     fetch("/api/keys")
       .then((r) => r.json())
       .then((data: { keys?: ApiKey[] }) => {
-        // 过滤掉已吊销的密钥
         const activeKeys = (data.keys ?? []).filter((k) => !k.revokedAt);
         setKeys(activeKeys);
         if (activeKeys.length > 0) {
@@ -40,40 +41,39 @@ export default function SkillPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-950">Skill 下载</h1>
+        <h1 className="text-xl font-semibold text-zinc-950">{t(locale, "skill.title")}</h1>
         <p className="mt-1 text-sm text-zinc-600">
-          下载 Skill 文件并配置到你的 AI 客户端
+          {t(locale, "skill.description")}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">iCalAgent Skill</CardTitle>
+          <CardTitle className="text-base">{t(locale, "skill.card.title")}</CardTitle>
           <CardDescription>
-            Skill 文件是 AI 代理的指导手册，告诉它如何搜索信息并调用 iCalAgent
-            API 创建日历订阅。
+            {t(locale, "skill.card.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {loading ? (
-            <p className="text-sm text-zinc-500">加载密钥列表...</p>
+            <p className="text-sm text-zinc-500">{t(locale, "skill.loadingKeys")}</p>
           ) : keys.length === 0 ? (
             <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
               <p>
-                你还没有可用的 API 密钥。请先
+                {t(locale, "skill.noKeys.prefix")}
                 <Link
                   href="/dashboard/keys"
                   className="font-medium underline underline-offset-2"
                 >
-                  创建一个 API 密钥
+                  {t(locale, "skill.noKeys.createLink")}
                 </Link>
-                ，然后回来下载已配置好的 Skill 文件。
+                {t(locale, "skill.noKeys.suffix")}
               </p>
               <p className="mt-2">
                 <a href="/api/skill/download" download>
                   <Button variant="outline" size="sm">
                     <Download className="h-4 w-4" />
-                    下载原始 SKILL.md
+                    {t(locale, "skill.downloadRaw")}
                   </Button>
                 </a>
               </p>
@@ -86,7 +86,7 @@ export default function SkillPage() {
                   htmlFor="key-select"
                   className="text-sm font-medium text-zinc-700"
                 >
-                  选择 API 密钥
+                  {t(locale, "skill.selectKey")}
                 </label>
               </div>
               <select
@@ -102,12 +102,12 @@ export default function SkillPage() {
                 ))}
               </select>
               <p className="text-xs text-zinc-500">
-                选择后下载的 SKILL.md 将自动嵌入该密钥和服务地址，无需手动配置环境变量。
+                {t(locale, "skill.selectKeyHint")}
               </p>
               <a href={downloadUrl} download>
                 <Button>
                   <Download className="h-4 w-4" />
-                  下载 SKILL.md
+                  {t(locale, "skill.download")}
                 </Button>
               </a>
             </>
@@ -117,9 +117,9 @@ export default function SkillPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">安装指引</CardTitle>
+          <CardTitle className="text-base">{t(locale, "skill.install.title")}</CardTitle>
           <CardDescription>
-            下载的 SKILL.md 已包含 API 密钥和服务地址，放入对应目录即可使用。
+            {t(locale, "skill.install.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

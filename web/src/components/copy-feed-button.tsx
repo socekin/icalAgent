@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
-export function CopyFeedButton({ feedUrl }: { feedUrl: string }) {
+export function CopyFeedButton({ feedUrl, locale }: { feedUrl: string; locale: Locale }) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
@@ -27,7 +29,7 @@ export function CopyFeedButton({ feedUrl }: { feedUrl: string }) {
       ) : (
         <>
           <Copy className="h-3.5 w-3.5 mr-1.5" />
-          复制
+          {t(locale, "copy")}
         </>
       )}
     </Button>

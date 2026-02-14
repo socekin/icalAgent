@@ -14,15 +14,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
 type DeleteSubscriptionButtonProps = {
   subscriptionId: string;
   displayName: string;
+  locale: Locale;
 };
 
 export function DeleteSubscriptionButton({
   subscriptionId,
   displayName,
+  locale,
 }: DeleteSubscriptionButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -57,19 +61,19 @@ export function DeleteSubscriptionButton({
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogTitle>{t(locale, "delete.confirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              确定要删除子日历「{displayName}」吗？关联的所有事件和同步记录将被一并删除，此操作不可撤销。
+              {t(locale, "delete.confirmDescription").replace("{name}", displayName)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>取消</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t(locale, "delete.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             >
-              {deleting ? "删除中…" : "删除"}
+              {deleting ? t(locale, "delete.deleting") : t(locale, "delete.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

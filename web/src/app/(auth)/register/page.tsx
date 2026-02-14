@@ -7,10 +7,12 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { t, getClientLocale, type Locale } from "@/i18n";
 
 export default function RegisterPage() {
   const router = useRouter();
 
+  const [locale] = useState<Locale>(getClientLocale);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,12 +25,12 @@ export default function RegisterPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("两次输入的密码不一致");
+      setError(t(locale, "auth.register.passwordMismatch"));
       return;
     }
 
     if (password.length < 6) {
-      setError("密码至少需要 6 个字符");
+      setError(t(locale, "auth.register.passwordTooShort"));
       return;
     }
 
@@ -44,14 +46,14 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "注册失败");
+        setError(data.error || t(locale, "auth.register.failed"));
         return;
       }
 
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("网络错误，请重试");
+      setError(t(locale, "auth.register.networkError"));
     } finally {
       setLoading(false);
     }
@@ -60,8 +62,8 @@ export default function RegisterPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">注册 iCalAgent</CardTitle>
-        <CardDescription>创建账户以管理你的日历订阅</CardDescription>
+        <CardTitle className="text-xl">{t(locale, "auth.register.title")}</CardTitle>
+        <CardDescription>{t(locale, "auth.register.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,7 +74,7 @@ export default function RegisterPage() {
           )}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              邮箱
+              {t(locale, "auth.register.email")}
             </label>
             <Input
               id="email"
@@ -85,12 +87,12 @@ export default function RegisterPage() {
           </div>
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              密码
+              {t(locale, "auth.register.password")}
             </label>
             <Input
               id="password"
               type="password"
-              placeholder="至少 6 个字符"
+              placeholder={t(locale, "auth.register.passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -98,12 +100,12 @@ export default function RegisterPage() {
           </div>
           <div className="space-y-2">
             <label htmlFor="confirmPassword" className="text-sm font-medium">
-              确认密码
+              {t(locale, "auth.register.confirmPassword")}
             </label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="再次输入密码"
+              placeholder={t(locale, "auth.register.confirmPlaceholder")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -114,15 +116,15 @@ export default function RegisterPage() {
             onSuccess={setTurnstileToken}
             onError={() => setTurnstileToken("")}
             onExpire={() => setTurnstileToken("")}
-            options={{ theme: "light", size: "normal", language: "zh-cn" }}
+            options={{ theme: "light", size: "normal", language: locale === "zh-CN" ? "zh-cn" : "en" }}
           />
           <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
-            {loading ? "注册中..." : "注册"}
+            {loading ? t(locale, "auth.register.submitting") : t(locale, "auth.register.submit")}
           </Button>
           <p className="text-center text-sm text-zinc-600">
-            已有账户？{" "}
+            {t(locale, "auth.register.hasAccount")}
             <Link href="/login" className="font-medium text-zinc-900 underline underline-offset-4">
-              登录
+              {t(locale, "auth.register.login")}
             </Link>
           </p>
         </form>

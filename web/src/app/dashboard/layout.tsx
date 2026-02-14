@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Github } from "lucide-react";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { getLocale, t } from "@/i18n";
 
 export default async function DashboardLayout({
   children,
@@ -9,6 +11,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await getAuthenticatedUser();
+  const locale = await getLocale();
 
   return (
     <div className="min-h-dvh">
@@ -20,17 +23,18 @@ export default async function DashboardLayout({
             </Link>
             <nav className="flex items-center gap-5 text-[13px] font-medium">
               <Link href="/dashboard" className="text-zinc-500 hover:text-black transition-colors">
-                我的订阅
+                {t(locale, "nav.mySubscriptions")}
               </Link>
               <Link href="/dashboard/keys" className="text-zinc-500 hover:text-black transition-colors">
-                API 密钥
+                {t(locale, "nav.apiKeys")}
               </Link>
               <Link href="/dashboard/skill" className="text-zinc-500 hover:text-black transition-colors">
-                Skill 下载
+                {t(locale, "nav.skillDownload")}
               </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher locale={locale} />
             <Link
               href="https://github.com/socekin/icalAgent"
               target="_blank"
@@ -40,7 +44,7 @@ export default async function DashboardLayout({
               GitHub
             </Link>
             <span className="text-[11px] font-medium text-zinc-400">{user?.email}</span>
-            <LogoutButton />
+            <LogoutButton locale={locale} />
           </div>
         </div>
       </header>

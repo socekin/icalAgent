@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Search, Loader2, Check, Calendar, Sparkles, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Locale } from "@/i18n/types";
+import { t } from "@/i18n";
 
 type DemoScenario = {
     query: string;
@@ -13,36 +15,39 @@ type DemoScenario = {
     };
 };
 
-const scenarios: DemoScenario[] = [
-    {
-        query: "帮我订阅 NBA 湖人队的赛程 🏀",
-        result: {
-            title: "NBA 湖人队 2024-25 赛季赛程",
-            feedUrl: "nba-lakers-schedule.ics",
-            icon: Calendar,
+function getScenarios(locale: Locale): DemoScenario[] {
+    return [
+        {
+            query: t(locale, "demo.scenario1.query"),
+            result: {
+                title: t(locale, "demo.scenario1.title"),
+                feedUrl: "nba-lakers-schedule.ics",
+                icon: Calendar,
+            },
         },
-    },
-    {
-        query: "订阅诺兰的新电影上映日程 🎬",
-        result: {
-            title: "Christoper Nolan Moves Release Dates",
-            feedUrl: "nolan-movies-release.ics",
-            icon: Calendar,
+        {
+            query: t(locale, "demo.scenario2.query"),
+            result: {
+                title: t(locale, "demo.scenario2.title"),
+                feedUrl: "nolan-movies-release.ics",
+                icon: Calendar,
+            },
         },
-    },
-    {
-        query: "订阅 SpaceX 下一次发射事件 🚀",
-        result: {
-            title: "SpaceX Launch Manifest",
-            feedUrl: "spacex-launches.ics",
-            icon: Calendar,
+        {
+            query: t(locale, "demo.scenario3.query"),
+            result: {
+                title: t(locale, "demo.scenario3.title"),
+                feedUrl: "spacex-launches.ics",
+                icon: Calendar,
+            },
         },
-    },
-];
+    ];
+}
 
 type AgentState = "idle" | "typing" | "thinking" | "searching" | "working" | "success";
 
-export function AgentDemo() {
+export function AgentDemo({ locale }: { locale: Locale }) {
+    const scenarios = getScenarios(locale);
     const [scenarioIndex, setScenarioIndex] = useState(0);
     const [state, setState] = useState<AgentState>("idle");
     const [displayedQuery, setDisplayedQuery] = useState("");
@@ -53,35 +58,29 @@ export function AgentDemo() {
         let timeoutId: NodeJS.Timeout;
 
         const playSequence = async () => {
-            // 1. Idle -> Typing
             setState("typing");
             setDisplayedQuery("");
 
             const query = currentScenario.query;
             for (let i = 0; i <= query.length; i++) {
                 setDisplayedQuery(query.slice(0, i));
-                await new Promise((resolve) => setTimeout(resolve, 50)); // Typing speed
+                await new Promise((resolve) => setTimeout(resolve, 50));
             }
 
-            await new Promise((resolve) => setTimeout(resolve, 800)); // Pause after typing
+            await new Promise((resolve) => setTimeout(resolve, 800));
 
-            // 2. Typing -> Thinking
             setState("thinking");
             await new Promise((resolve) => setTimeout(resolve, 1500));
 
-            // 3. Thinking -> Searching
             setState("searching");
             await new Promise((resolve) => setTimeout(resolve, 1200));
 
-            // 4. Searching -> Working
             setState("working");
             await new Promise((resolve) => setTimeout(resolve, 1200));
 
-            // 5. Working -> Success
             setState("success");
-            await new Promise((resolve) => setTimeout(resolve, 4000)); // Show result for 4s
+            await new Promise((resolve) => setTimeout(resolve, 4000));
 
-            // 6. Reset and Loop
             setState("idle");
             setDisplayedQuery("");
             setScenarioIndex((prev) => (prev + 1) % scenarios.length);
@@ -92,7 +91,7 @@ export function AgentDemo() {
         }
 
         return () => clearTimeout(timeoutId);
-    }, [state, currentScenario, scenarioIndex]);
+    }, [state, currentScenario, scenarioIndex, scenarios.length]);
 
     return (
         <div className="relative mx-auto w-full max-w-lg overflow-hidden rounded-3xl border border-zinc-200/60 bg-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-sm">
@@ -130,9 +129,9 @@ export function AgentDemo() {
                         </div>
                         <div className="flex flex-col items-center gap-1">
                             <span className="text-sm font-medium text-zinc-700">
-                                {state === "thinking" && "AI 正在分析意图..."}
-                                {state === "searching" && "正在全网检索赛程..."}
-                                {state === "working" && "生成日历订阅源..."}
+                                {state === "thinking" && t(locale, "demo.state.thinking")}
+                                {state === "searching" && t(locale, "demo.state.searching")}
+                                {state === "working" && t(locale, "demo.state.working")}
                             </span>
                             <span className="text-xs text-zinc-400">iCalAgent is working</span>
                         </div>
@@ -150,10 +149,10 @@ export function AgentDemo() {
                                 <div className="mb-0.5 flex items-center gap-2">
                                     <h3 className="truncate font-semibold text-zinc-900">{currentScenario.result.title}</h3>
                                     <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600">
-                                        活跃
+                                        {t(locale, "demo.badge.active")}
                                     </span>
                                 </div>
-                                <p className="mb-2 text-xs text-zinc-500">已自动过滤无关信息，仅保留核心日程。</p>
+                                <p className="mb-2 text-xs text-zinc-500">{t(locale, "demo.result.description")}</p>
                                 <div className="flex items-center gap-2 rounded-md bg-zinc-50 px-2 py-1.5">
                                     <code className="flex-1 truncate text-[10px] text-zinc-500 font-mono">
                                         https://icalagent.com/f/{currentScenario.result.feedUrl}

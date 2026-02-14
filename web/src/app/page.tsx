@@ -5,14 +5,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { AgentDemo } from "@/components/landing/agent-demo";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { getLocale, t } from "@/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const user = await getAuthenticatedUser();
+  const locale = await getLocale();
 
   return (
     <main className="relative flex min-h-screen flex-col items-center overflow-hidden bg-background">
+      {/* Language Switcher */}
+      <div className="absolute right-6 top-6 z-20">
+        <LanguageSwitcher locale={locale} />
+      </div>
+
       {/* Background Decorative Elements */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-[10%] -left-[10%] h-[40%] w-[40%] rounded-full bg-zinc-200/20 blur-[120px]" />
@@ -38,27 +46,27 @@ export default async function HomePage() {
             </div>
 
             <h1 className="mx-auto max-w-4xl text-5xl font-bold tracking-tight text-zinc-950 sm:text-7xl">
-              日历订阅，<span className="text-zinc-400">从未如此简单</span>
+              {t(locale, "landing.hero.title")}<span className="text-zinc-400">{t(locale, "landing.hero.titleHighlight")}</span>
             </h1>
 
             <div className="mx-auto mt-10 w-full max-w-2xl">
-              <AgentDemo />
+              <AgentDemo locale={locale} />
             </div>
 
             <div className="mt-12 flex flex-wrap justify-center gap-4">
               {user ? (
                 <Button asChild size="lg" className="h-14 rounded-full px-10 text-base font-semibold premium-hover">
                   <Link href="/dashboard" className="flex items-center gap-2">
-                    进入控制台 <ArrowRight className="h-4 w-4" />
+                    {t(locale, "landing.cta.dashboard")} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               ) : (
                 <>
                   <Button asChild size="lg" className="h-14 rounded-full px-10 text-base font-semibold premium-hover">
-                    <Link href="/register">立即开始</Link>
+                    <Link href="/register">{t(locale, "landing.cta.getStarted")}</Link>
                   </Button>
                   <Button asChild variant="outline" size="lg" className="h-14 rounded-full border-zinc-200 px-10 text-base font-semibold hover:bg-zinc-50">
-                    <Link href="/login">控制台登录</Link>
+                    <Link href="/login">{t(locale, "landing.cta.login")}</Link>
                   </Button>
                 </>
               )}
@@ -71,23 +79,23 @@ export default async function HomePage() {
           {[
             {
               icon: Zap,
-              title: "AI Agent 驱动",
-              desc: "自动搜寻全球信息并同步至日历，覆盖全面，一句话就能订阅。",
+              title: t(locale, "landing.feature.aiAgent.title"),
+              desc: t(locale, "landing.feature.aiAgent.desc"),
             },
             {
               icon: Globe2,
-              title: "全场景支持",
-              desc: "涵盖体育赛事、影视追剧、金融财报等，凡有时间属性的事件皆可订阅。",
+              title: t(locale, "landing.feature.allScenarios.title"),
+              desc: t(locale, "landing.feature.allScenarios.desc"),
             },
             {
               icon: CalendarCheck2,
-              title: "实时在线日历",
-              desc: "支持 Apple/Google/Outlook 多端自动拉取，一次订阅，动态更新。",
+              title: t(locale, "landing.feature.liveCalendar.title"),
+              desc: t(locale, "landing.feature.liveCalendar.desc"),
             },
             {
               icon: ShieldCheck,
-              title: "真实可靠",
-              desc: "事件来源透明可追溯，信息置信度一目了然，幻觉问题轻松辨认。",
+              title: t(locale, "landing.feature.reliable.title"),
+              desc: t(locale, "landing.feature.reliable.desc"),
             },
           ].map((feature, idx) => (
             <div
