@@ -23,14 +23,11 @@ export async function POST(request: Request) {
     // Set httpOnly session cookies
     await setSessionCookies(accessToken, refreshToken);
 
-    // Check if this is a new user by looking up user_profiles
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    // Detect new user: if created_at is within the last 60 seconds, it's a first-time sign-up
+    const createdAt = new Date(user.created_at).getTime();
+    const isNewUser = Date.now() - createdAt < 60_000;
 
-    if (!profile) {
+    if (isNewUser) {
       try {
         await notifyTelegram(`📮 新用户注册: ${user.email} (via GitHub)`);
       } catch (err) {
